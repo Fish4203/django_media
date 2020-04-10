@@ -41,11 +41,18 @@ def vote(request, question_id):
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
 
 def new_question(request):
+    if request.POST['question_name'] == '':
+        return render(request, 'polls/index', {
+            'error_message': "The question was blank",
+        })
+
     try:
         question = Question(question_text=request.POST['question_name'], date=timezone.now())
         question.save()
     except:
-        print('could not make the question')
+        return render(request, 'polls/index', {
+            'error_message': "Failed to create question",
+        })
 
     try:
         question.choice_set.create(choice_text=request.POST['option1'], votes=0)
@@ -54,11 +61,16 @@ def new_question(request):
 
         question.save()
     except:
-        print('it didnt work')
-        print(request.POST['question_name'])
-        print(request.POST['option1'],request.POST['option2'],request.POST['option3'])
+        try:
+            question.delete()
 
-    print(request.POST)
+            return render(request, 'polls/index', {
+                'error_message': "failed to create choices question deleated",
+            })
+        except:
+            return render(request, 'polls/index', {
+                'error_message': "failed to create choices question not deleated",
+            })
 
     return HttpResponseRedirect(reverse('polls:index'))
 
