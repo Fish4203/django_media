@@ -1,0 +1,30 @@
+<body>
+  {% if question_list %}
+    <ul>
+      {% for question in question_list %}
+        <li><a href="{% url 'polls:detail' question.id %}"> {{ question.question_text }} </a></li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>There are no polls <p>
+  {% endif %}
+
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+  <h1>Make a new question</h1>
+
+  <form class="create" action="{% url 'polls:new_question' %}" method="post">
+    {% csrf_token %}
+
+    <label for="question_name">What do you want to ask</label><br>
+    <input type="text" name="question_name" id="question_name"><br>
+
+    <label for="option">Option</label><br>
+    <input type="text" id="option" name="option1" value="option"><br>
+    <input type="text" id="option" name="option2" value="option"><br>
+    <input type="text" id="option" name="option3" value="option">
+
+
+    <input type="submit" value="create">
+  </form>
+</body>
