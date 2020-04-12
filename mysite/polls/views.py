@@ -13,14 +13,35 @@ class Index(generic.ListView):
     def get_queryset(self):
         return Question.objects.order_by('-date')
 
+    additional_context = {'a':'polling', 'b':'index'}
+    def get_context_data(self, *args, **kwargs):
+        context = super(Index, self).get_context_data(*args, **kwargs)
+        context['additional_context'] = self.additional_context
+        print(context)
+        return context
+
 
 class Detail(generic.DetailView):
     model = Question
     template_name = 'polls/detail.html'
 
+    additional_context = {'a':'polling'}
+    def get_context_data(self, *args, **kwargs):
+        context = super(Detail, self).get_context_data(*args, **kwargs)
+        context['additional_context'] = self.additional_context
+        print(context)
+        return context
+
 class Results(generic.DetailView):
     model = Question
     template_name = 'polls/results.html'
+
+    additional_context = {'a':'polling'}
+    def get_context_data(self, *args, **kwargs):
+        context = super(Results, self).get_context_data(*args, **kwargs)
+        context['additional_context'] = self.additional_context
+        print(context)
+        return context
 
 
 

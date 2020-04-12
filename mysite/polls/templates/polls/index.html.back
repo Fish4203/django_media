@@ -1,0 +1,97 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}">
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+<head>
+  <title>Polling App</title>
+</head>
+
+<body class="">
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-3">
+    <div class="container-fluid">
+        <a href="#" class="navbar-brand mr-3">Ben's Programs</a>
+        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav">
+              <a href="#" class="nav-item nav-link">Home</a>
+              <a href="#" class="nav-item nav-link">About Me</a>
+              <div class="nav-item dropdown">
+                  <a href="#" class="nav-link dropdown-toggle active" data-toggle="dropdown">Polling app</a>
+                  <div class="dropdown-menu bg-dark">
+                      <a href="{% url 'polls:index' %}" class="dropdown-item active">Index</a>
+                      <a href="#" class="dropdown-item deactive">More Options comming soon</a>
+                  </div>
+              </div>
+              <a href="https://github.com/Fish4203" class="nav-item nav-link" tabindex="-1">Github</a>
+            </div>
+            <div class="navbar-nav ml-auto">
+                <a href="http://127.0.0.1:8000/admin/" class="nav-item nav-link">Admin</a>
+            </div>
+        </div>
+    </div>
+  </nav>
+
+
+  <div class="fluid-container">
+    <div class="row ">
+        <div class="col px-md-5   ">
+          <div class="p-3 jumbotron">
+            <h2>Vote on a Question</h2>
+
+            {% if question_list %}
+              <ul>
+                {% for question in question_list %}
+                  <li><a href="{% url 'polls:detail' question.id %}"> {{ question.question_text }} </a></li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p>There are no polls <p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="col px-md-5 ">
+          <div class="p-3 jumbotron">
+            {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+            <h2>Make a new question</h2>
+
+            <form class="create" action="{% url 'polls:new_question' %}" method="post">
+              {% csrf_token %}
+
+              <div class="form-group">
+                <label for="question_name">What do you want to ask</label><br>
+                <input type="text" name="question_name" id="question_name" placeholder="What is you favoret colour"><br>
+              </div>
+
+              <div class="form-group">
+                <label for="option">Option</label><br>
+                <input type="text" id="option" name="option1" placeholder="option"><br>
+                <input type="text" id="option" name="option2" placeholder="option"><br>
+                <input type="text" id="option" name="option3" placeholder="option">
+              </div>
+
+              <input type="submit" value="create">
+
+            </form>
+          </div>
+        </div>
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+</body>
