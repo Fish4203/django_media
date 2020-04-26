@@ -13,3 +13,7 @@ def homePage(request):
 def about(request):
     context = {"additional_context": {'a': 'about'}}
     return render(request, 'home/about.html', context)
+
+def algox(request):
+    context = {"additional_context": {'a': 'algox'}}
+    return render(request, 'home/algox.html', context)

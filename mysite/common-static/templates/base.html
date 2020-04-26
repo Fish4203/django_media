@@ -31,6 +31,7 @@
                   </div>
               </div>
               <a href="https://github.com/Fish4203" class="nav-item nav-link" tabindex="-1">Github</a>
+              <a href="{% url 'home:algox' %}" class="nav-item nav-link {% if additional_context.a == 'algox' %} active {% endif %}">Graphs</a>
             </div>
             <div class="navbar-nav ml-auto">
                 <a href="http://127.0.0.1:8000/admin/" class="nav-item nav-link">Admin</a>
@@ -38,19 +39,8 @@
         </div>
     </div>
   </nav>
-
-
-  <div class="fluid-container">
-    <div class="row ">
-      {% block content %}{% endblock %}
-    </div>
-  </div>
-
-
-
-
-
-
-
+  {% block content %}{% endblock %}
 
 </body>
+
+<!-- https://startbootstrap.com/templates/ -->
