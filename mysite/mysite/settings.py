@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django_extensions',
+    'message.apps.MessageConfig',
     'home.apps.HomeConfig',
     'polls.apps.PollsConfig',
     'django.contrib.admin',

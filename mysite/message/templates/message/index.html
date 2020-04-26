@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+{% for post in posts %}
+  <h3>{{ post.title_text }}</h3>
+  <p>{{ post.body_text }}</p>
+  <p>Author: {{ post.user }}</p>
+  <p>Date Published: {{ post.date }}</p>
+{% endfor %}
+
+{% if request.user.is_authenticated %}
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<h2>Make a new Post</h2>
+
+<form class="create" action="{% url 'message:new_post' %}" method="post">
+  {% csrf_token %}
+
+  <div class="form-group">
+    <label for="post_title">Title</label><br>
+    <input type="text" name="post_title" id="post_title" placeholder="title"><br>
+  </div>
+
+  <div class="form-group">
+    <label for="body_text">What did you want to say</label><br>
+    <input type="text" id="body_text" name="body_text" placeholder="What is you favoret colour"><br>
+  </div>
+
+  <input class='btn btn-success' type="submit" value="create">
+
+</form>
+{% endif %}
+
+{% endblock %}
