@@ -35,6 +35,22 @@ def signin(request):
             'error_message': "invalid username or password",
         })
 
+def new_account(request):
+    username = request.POST['username']
+    email = request.POST['email']
+    password = request.POST['password']
+
+    try:
+        new_user = User(username=username, email=email)
+        new_user.set_password(password)
+        new_user.save()
+
+        return HttpResponseRedirect(reverse('home:homePage'))
+    except:
+        return render(request, 'home/homepage.html', {
+            'error_message': "could not create account",
+        })
+
 
 
 def signout(request):

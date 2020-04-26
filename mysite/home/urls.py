@@ -7,6 +7,7 @@ urlpatterns = [
     path('AboutMe/', views.about, name='about'),
     path('algox', views.algox, name='algox'),
     path('signin', views.signin, name='signin'),
+    path('new_account', views.new_account, name='new_account'),
     path('signout', views.signout, name='signout')
 
 ]

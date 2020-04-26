@@ -7,7 +7,7 @@ from django.utils import timezone
 class Posts(models.Model):
     title_text = models.CharField(max_length=200)
     body_text = models.CharField(max_length=2000)
-    img_link = models.CharField(max_length=500)
+    img_link = models.CharField(max_length=500, default='')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField('date published')
 

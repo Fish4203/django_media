@@ -38,32 +38,76 @@
               {% if request.user.is_authenticated %}
                 <a href="{% url 'home:signout' %}" class="nav-item btn btn-secondary">Signout of {{ request.user }}</a>
               {% else %}
+                <div class="dropdown px-2">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Create Account
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+
+                    <div class="card">
+                      <div class="card-header">
+                        <h2>Create Account</h2>
+                      </div>
+                      <div class="card-body">
+                        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+                        <form class="create" action="{% url 'home:new_account' %}" method="post">
+                          {% csrf_token %}
+
+                          <div class="form-group">
+                            <label for="question_name">Username</label><br>
+                            <input type="text" name="username" id="username" placeholder="username"><br>
+                          </div>
+
+                          <div class="form-group">
+                            <label for="email">Email</label><br>
+                            <input type="text" name="email" id="email" placeholder="example@example.com"><br>
+                          </div>
+
+                          <div class="form-group">
+                            <label for="option">Password</label><br>
+                            <input type="text" id="password" name="password" placeholder="strong password"><br>
+                          </div>
+
+                          <input class='btn btn-success' type="submit" value="Create">
+
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="dropdown">
                   <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Signin
                   </button>
                   <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
 
-                    <h2>Login</h2>
-
-                    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-                    <form class="create" action="{% url 'home:signin' %}" method="post">
-                      {% csrf_token %}
-
-                      <div class="form-group">
-                        <label for="question_name">Username</label><br>
-                        <input type="text" name="username" id="username" placeholder="username"><br>
+                    <div class="card">
+                      <div class="card-header">
+                        <h2>Login</h2>
                       </div>
+                      <div class="card-body">
+                        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-                      <div class="form-group">
-                        <label for="option">Password</label><br>
-                        <input type="text" id="password" name="password" placeholder="password"><br>
+                        <form class="create" action="{% url 'home:signin' %}" method="post">
+                          {% csrf_token %}
+
+                          <div class="form-group">
+                            <label for="question_name">Username</label><br>
+                            <input type="text" name="username" id="username" placeholder="username"><br>
+                          </div>
+
+                          <div class="form-group">
+                            <label for="option">Password</label><br>
+                            <input type="text" id="password" name="password" placeholder="password"><br>
+                          </div>
+
+                          <input class='btn btn-success' type="submit" value="signin">
+
+                        </form>
                       </div>
-
-                      <input class='btn btn-success' type="submit" value="signin">
-
-                    </form>
+                    </div>
                   </div>
                 </div>
               {% endif %}
