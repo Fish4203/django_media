@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from message.models import Posts
+from message.models import Posts, Comments
 
 
 
@@ -28,17 +28,50 @@ def delete(request, title):
             post.delete()
             return HttpResponseRedirect(reverse('message:index'))
         else:
-            return render(request, 'message/index', {
+            return render(request, 'message/index.html', {
                 'error_message': "Failed to authenticate",
             })
     except:
-        return render(request, 'message/index', {
+        return render(request, 'message/index.html', {
             'error_message': "Failed to find post",
         })
 
+
+def post_full(request, title):
+    post = Posts.objects.get(title_text=title)
+
+    context = {'post': post}
+    return render(request, 'message/post.html', context)
+
+def new_comment(request):
+    user=request.user
+    date=timezone.now()
+    comment_text = request.POST['comment_text']
+
+    try:
+        comment = Comments(comment_text=comment_text, user=user, date=date)
+        comment.save()
+    except:
+        return render(request, 'message/index.html', {
+            'error_message': "Failed to make comment",
+        })
+
+    try:
+
+        post = Posts.objects.get(id=int(request.POST['post_top']))
+        post.comment_link.add(comment)
+        post.save()
+
+        return HttpResponseRedirect(reverse('message:index'))
+    except:
+        return render(request, 'message/index.html', {
+            'error_message': "Failed to add to post",
+        })
+
+
 def new_post(request):
     if request.POST['post_title'] == '' or request.POST['body_text'] == '':
-        return render(request, 'message/index', {
+        return render(request, 'message/index.html', {
             'error_message': "The title or post body was blank",
         })
 
