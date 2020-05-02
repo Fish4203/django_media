@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <!-- Page Content -->
+  <div class="container">
+
+    <!-- Jumbotron Header -->
+    <header class="jumbotron my-4">
+      <h1 class="display-3">{{ class.name }}</h1>
+      <p class="lead">Placeholder info {{ class.course_code }} </p>
+      <a href="https://jmss.instructure.com/courses/{{ class.id }}" class="btn btn-info btn-lg">Canvas link </a>
+    </header>
+
+  <div id="accordion">
+    <h3>Modules</h3>
+    {% for module in modules %}
+
+    <div class="card">
+      <div class="card-header" id="headingOne">
+        <h5 class="mb-0">
+          <button class="btn btn-link-dark collapsed dropdown-toggle" data-toggle="collapse" data-target="#id{{ module.id }}" aria-expanded="false" aria-controls="id{{ module.id }}">
+            {{ module.name }}
+          </button>
+        </h5>
+      </div>
+
+      <div id="id{{ module.id }}" class="collapse" aria-labelledby="name{{ module.id }}" data-parent="#accordion">
+        <ul class="list-group">
+
+
+          <!-- Module card -->
+
+
+
+            {% for item in module.items %}
+              <li class="list-group-item">
+                <h6>{{ item.title }}</h6>
+                <a href="{% url 'compvas:module_item' class.id item.title %}" class="btn btn-success m-1">Full Module</a>
+                <a href="{{ item.html_url }}" class="btn btn-info m-1">canvas link</a>
+              </li>
+            {% endfor %}
+          <!-- /.row -->
+
+
+
+        </ul>
+      </div>
+    </div>
+
+    {% endfor %}
+  </div>
+
+  <br>
+
+  <div id="accordion">
+    <h3>Assignments</h3>
+    {% for assignment in assign %}
+
+    <div class="card">
+      <div class="card-header" id="headingOne">
+        <h5 class="mb-0">
+          <button class="btn btn-link-dark collapsed dropdown-toggle" data-toggle="collapse" data-target="#id{{ assignment.id }}" aria-expanded="false" aria-controls="id{{ assignment.id }}">
+            {{ assignment.name }}
+          </button>
+          <a class="btn btn-info float-right" href="https://jmss.instructure.com/courses/{{ class.id }}/assignments/{{ assignment.id }}">Canvas link</a>
+        </h5>
+      </div>
+
+      <div id="id{{ assignment.id }}" class="collapse" aria-labelledby="name{{ assignment.id }}" data-parent="#accordion">
+        <div class="card-body">
+          <a class="btn btn-success float-right" href="{% url 'compvas:assignment_item' class.id assignment.id %}">{{ assignment.name }}</a>
+
+
+          <!-- assignment card -->
+          {{ assignment.description|safe }}
+
+
+
+        </div>
+      </div>
+    </div>
+
+    {% endfor %}
+  </div>
+
+  <!-- quizes -->
+  <div id="accordion">
+    <h3>Quizzes</h3>
+    {% for quiz in quizes %}
+
+    <div class="card">
+      <div class="card-header" id="headingOne">
+        <h5 class="mb-0">
+          <button class="btn btn-link-dark collapsed dropdown-toggle" data-toggle="collapse" data-target="#id{{ quiz.id }}" aria-expanded="false" aria-controls="id{{ quiz.id }}">
+            {{ quiz.title }}
+          </button>
+          <a class="btn btn-info float-right" href="https://jmss.instructure.com/courses/{{ class.id }}/quizzes/{{ quiz.id }}">Canvas link</a>
+        </h5>
+      </div>
+
+      <div id="id{{ quiz.id }}" class="collapse" aria-labelledby="name{{ quiz.id }}" data-parent="#accordion">
+        <div class="card-body">
+
+          <p>the</p>
+          <!-- assignment card -->
+          {{ quiz.description|safe }}
+
+          {{ quiz. }}
+
+        </div>
+      </div>
+    </div>
+
+    {% endfor %}
+  </div>
+
+
+
+
+  </div>
+  <!-- /.container -->
+  <br>
+  <br><br><br><br><br>
+
+{% endblock %}

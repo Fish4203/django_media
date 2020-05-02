@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <!-- Page Content -->
+  <div class="container">
+
+    <div class="row">
+
+      <!-- Post Content Column -->
+      <div class="col-lg-8">
+
+        {% for questions in quiz_item %}
+          {{ questions.id }}
+          {{ questions.name }}
+          {{ questions.title }}
+          {{ questions.answer }}
+        {% endfor %}
+
+      </div>
+
+      <!-- Sidebar Widgets Column -->
+      <div class="col-md-4">
+
+        <!-- Search Widget -->
+        <div class="card my-4">
+          <h5 class="card-header">Search</h5>
+          <div class="card-body">
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Search for...">
+              <span class="input-group-btn">
+                <button class="btn btn-secondary" type="button">Go!</button>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- modules -->
+        <div id="card my-4">
+          <div class="card-header">
+            <h3>Modules</h3>
+          </div>
+
+
+          <div class="card-body">
+            {% for module in modules %}
+
+              <h5 class="px-1 ">
+                <button class="btn btn-secondary collapsed" data-toggle="collapse" data-target="#id{{ module.id }}" aria-expanded="false" aria-controls="id{{ module.id }}">
+                  {{ module.name }}
+                </button>
+              </h5>
+
+              <div id="id{{ module.id }}" class="collapse" aria-labelledby="name{{ module.id }}" data-parent="#accordion">
+
+                    {% for item in module.items %}
+                      <a href="{% url 'compvas:module_item' class.id item.title %}" class="btn btn-info m-1">{{ item.title }}</a>
+                    {% endfor %}
+
+              </div>
+
+            {% endfor %}
+          </div>
+
+        </div>
+
+        <!-- asignments-->
+        <div id="card my-4">
+          <div class="card-header">
+            <h3>Asignments</h3>
+          </div>
+
+
+          <div class="card-body">
+            {% for assignment in assign %}
+
+              <h5 class="px-1 ">
+                <button class="btn btn-secondary collapsed" data-toggle="collapse" data-target="#id{{ assignment.id }}" aria-expanded="false" aria-controls="id{{ assignment.id }}">
+                  {{ assignment.name }}
+                </button>
+              </h5>
+
+              <div id="id{{ assignment.id }}" class="collapse" aria-labelledby="name{{ assignment.id }}" data-parent="#accordion">
+
+                {{ assignment.description|safe }}
+
+              </div>
+
+            {% endfor %}
+          </div>
+
+        </div>
+
+        <div id="accordion">
+
+        </div>
+      </div>
+
+    </div>
+    <!-- /.row -->
+
+  </div>
+  <!-- /.container -->
+
+{% endblock %}

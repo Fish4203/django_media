@@ -20,5 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('polls/', include('polls.urls')),
     path('home/', include('home.urls')),
-    path('message/', include('message.urls'))
+    path('message/', include('message.urls')),
+    path('compvas/', include('compvas.urls')),
 ]
