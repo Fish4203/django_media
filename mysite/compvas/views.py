@@ -102,12 +102,12 @@ def new_submission(request, class_id, assignment_name):
     if 'http' in request.POST['sub_input']:
         payload_assignment_item = {'submission[submission_type]': 'online_url', 'submission[url]': request.POST['sub_input'], 'comment[text_comment]': request.POST['comment'] }
     else:
-        payload_submission = {'submission[submission_type]': 'online_text_entry', 'submission[url]': request.POST['sub_input'], 'comment[text_comment]': request.POST['comment'] }
+        payload_submission = {'submission[submission_type]': 'online_text_entry', 'submission[body]': request.POST['sub_input']}
 
     headers = {"Authorization": f"Bearer {auth_token}"}
 
     try:
-        response_assignment_item = requests.get(url_submission, headers=headers, params=payload_submission)
+        response_assignment_item = requests.post(url_submission, headers=headers, params=payload_submission)
 
         if response_assignment_item.status_code == 201:
             return HttpResponseRedirect(reverse('compvas:index'))
