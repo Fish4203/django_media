@@ -42,7 +42,8 @@
               <p class="card-text"> the class id is {{ class.id }} and the name is  {{ class.course_code }} </p>
             </div>
             <div class="card-footer">
-              <a href="{% url 'compvas:classes' class.id %}" class="btn btn-primary btn-sm">More Info</a>
+              <a href="{% url 'compvas:classes' class.id %}" class="btn btn-success btn-sm">Class</a>
+              <a href="https://jmss.instructure.com/courses/{{ class.id }}" class="btn btn-info btn-sm">Class canvas</a>
             </div>
           </div>
         </div>

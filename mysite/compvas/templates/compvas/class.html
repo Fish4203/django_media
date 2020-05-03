@@ -11,6 +11,30 @@
       <a href="https://jmss.instructure.com/courses/{{ class.id }}" class="btn btn-info btn-lg">Canvas link </a>
     </header>
 
+  <!-- front page -->
+  <div id="accordion">
+    <h3>Pages</h3>
+
+    <div class="card">
+      <div class="card-header" id="headingOne">
+        <h5 class="mb-0">
+          <button class="btn btn-link-dark collapsed dropdown-toggle" data-toggle="collapse" data-target="#front_page" aria-expanded="false" aria-controls="front_page">
+            {{ front_page.title }}
+          </button>
+        </h5>
+      </div>
+
+      <div id="front_page" class="collapse" aria-labelledby="front_page" data-parent="#accordion">
+
+        {{ front_page.body|safe }}
+
+      </div>
+    </div>
+  </div>
+
+
+  <br>
+
   <div id="accordion">
     <h3>Modules</h3>
     {% for module in modules %}
@@ -52,9 +76,11 @@
 
   <br>
 
-  <div id="accordion">
+  <div id="accordion flex-reverse">
     <h3>Assignments</h3>
-    {% for assignment in assign %}
+    {% for assignment in assign reversed %}
+
+
 
     <div class="card">
       <div class="card-header" id="headingOne">
@@ -62,17 +88,23 @@
           <button class="btn btn-link-dark collapsed dropdown-toggle" data-toggle="collapse" data-target="#id{{ assignment.id }}" aria-expanded="false" aria-controls="id{{ assignment.id }}">
             {{ assignment.name }}
           </button>
-          <a class="btn btn-info float-right" href="https://jmss.instructure.com/courses/{{ class.id }}/assignments/{{ assignment.id }}">Canvas link</a>
+          <a class="btn btn-success float-right" href="{% url 'compvas:assignment_item' class.id assignment.id %}">{{ assignment.name }}</a>
         </h5>
       </div>
 
       <div id="id{{ assignment.id }}" class="collapse" aria-labelledby="name{{ assignment.id }}" data-parent="#accordion">
         <div class="card-body">
-          <a class="btn btn-success float-right" href="{% url 'compvas:assignment_item' class.id assignment.id %}">{{ assignment.name }}</a>
+          <a class="btn btn-info float-right" href="https://jmss.instructure.com/courses/{{ class.id }}/assignments/{{ assignment.id }}">Canvas link</a>
 
 
           <!-- assignment card -->
-          {{ assignment.description|safe }}
+          <div class="">
+            <h3>Esential info</h3>
+            <p>due Date:{{ assignment.due_at }}</p>
+            <p>Muted:{{ assignment.muted }}</p>
+            <p>submission types:{{ assignment.submission_types }}</p>
+            <p>Is compleat:{{ assignment.has_submitted_submissions }}</p>
+          </div>
 
 
 

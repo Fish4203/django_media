@@ -21,6 +21,8 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav">
+
+              <!-- urls for the nav bar -->
               <a href="{% url 'home:homePage' %}" class="nav-item nav-link {% if additional_context.a == 'home' %} active {% endif %}">Home</a>
               <a href="{% url 'home:about' %}" class="nav-item nav-link {% if additional_context.a == 'about' %} active {% endif %}">About Me</a>
               <a href="{% url 'message:index' %}" class="nav-item nav-link {% if additional_context.a == 'posts' %} active {% endif %}">message</a>
@@ -33,6 +35,20 @@
               </div>
               <a href="https://github.com/Fish4203" class="nav-item nav-link" tabindex="-1">Github</a>
               <a href="{% url 'home:algox' %}" class="nav-item nav-link {% if additional_context.a == 'algox' %} active {% endif %}">Graphs</a>
+
+              <div class="nav-item dropdown">
+                  <a href="#" class="nav-link dropdown-toggle {% if additional_context.a == 'compvas' %} active {% endif %}" data-toggle="dropdown">Compvas</a>
+                  <div class="dropdown-menu bg-dark">
+                      <a href="{% url 'compvas:index' %}" class="dropdown-item {% if additional_context.b == 'index' %} active {% endif %} ">Index</a>
+
+                      {% for class in classes %}
+                      <a href="{% url 'compvas:classes' class.id %}" class="dropdown-item {% if additional_context.b == class.id %} active {% endif %}">{{ class.name }}</a>
+                      {% endfor %}
+
+                  </div>
+              </div>
+
+
             </div>
             <div class="navbar-nav ml-auto">
               {% if request.user.is_authenticated %}

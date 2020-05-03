@@ -19,7 +19,7 @@ def index(request):
     global auth_token
     headers = {"Authorization": f"Bearer {auth_token}"}
     url = 'https://jmss.instructure.com/api/v1/courses'
-    payload_class = {'include': 'course_image'}
+    payload_class = {'include': 'course_image', 'per_page': 1000}
 
     response = requests.get(url, headers=headers, params=payload_class)
     context = {"additional_context": {'a': 'compvas', 'b': 'index'}, 'classes': response.json()}
@@ -33,9 +33,10 @@ def classes(request, class_id):
     url_assign = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments'
     url_modules = f'https://jmss.instructure.com/api/v1/courses/{class_id}/modules'
     url_quiz = f'https://jmss.instructure.com/api/v1/courses/{class_id}/quizzes'
+    url_front_page = f'https://jmss.instructure.com/api/v1/courses/{class_id}/front_page'
 
-    payload_modules = {'include': 'items'}
-    payload_assign = {'include': 'items'}
+    payload_modules = {'include': 'items', 'per_page': 1000}
+    payload_assign = {'include': 'items', 'per_page': 1000, 'order_by': 'due_at'}
 
     headers = {"Authorization": f"Bearer {auth_token}"}
 
@@ -43,8 +44,9 @@ def classes(request, class_id):
     response_assign = requests.get(url_assign, headers=headers, params=payload_assign)
     response_modules = requests.get(url_modules, headers=headers, params=payload_modules)
     response_quiz = requests.get(url_quiz, headers=headers)
+    response_front_page = requests.get(url_front_page, headers=headers)
 
-    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'class': response_class.json(), 'modules': response_modules.json(), 'assign': response_assign.json(), 'quizes': response_quiz.json()}
+    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'front_page': response_front_page.json(), 'class': response_class.json(), 'modules': response_modules.json(), 'assign': response_assign.json(), 'quizes': response_quiz.json()}
     return render(request, 'compvas/class.html', context)
 
 
@@ -56,9 +58,9 @@ def module_item(request, class_id, module_name):
     url_modules = f'https://jmss.instructure.com/api/v1/courses/{class_id}/modules'
     url_module_item = f'https://jmss.instructure.com/api/v1/courses/{class_id}/pages/{module_name}'
 
-    payload_module_item = {'include': 'items'}
-    payload_modules = {'include': 'items'}
-    payload_assign = {'include': 'items'}
+    payload_module_item = {'include': 'items', 'per_page': 1000}
+    payload_modules = {'include': 'items', 'per_page': 1000}
+    payload_assign = {'include': 'items', 'per_page': 1000, 'order_by': 'due_at'}
 
     headers = {"Authorization": f"Bearer {auth_token}"}
 
@@ -79,9 +81,9 @@ def assignment_item(request, class_id, assignment_name):
     url_modules = f'https://jmss.instructure.com/api/v1/courses/{class_id}/modules'
     url_assignment_item = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments/{assignment_name}'
 
-    payload_assignment_item = {'include': 'submission'}
-    payload_modules = {'include': 'items'}
-    payload_assign = {'include': 'items'}
+    payload_assignment_item = {'include': 'submission', 'per_page': 1000}
+    payload_modules = {'include': 'items', 'per_page': 1000}
+    payload_assign = {'include': 'items', 'per_page': 1000, 'order_by': 'due_at'}
 
     headers = {"Authorization": f"Bearer {auth_token}"}
 

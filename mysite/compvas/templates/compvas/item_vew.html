@@ -67,7 +67,7 @@
 
 
           <div class="card-body ">
-            {% for assignment in assign %}
+            {% for assignment in assign reversed %}
               <div class="m-2">
                 <a class="btn btn-success " href="{% url 'compvas:assignment_item' class.id assignment.id %}">{{ assignment.name }}</a>
               </div>
