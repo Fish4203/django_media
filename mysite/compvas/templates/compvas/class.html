@@ -6,6 +6,11 @@
 
     <!-- Jumbotron Header -->
     <header class="jumbotron my-4">
+      {% if error_info or error_class %}
+        <p>{{ error_info }}</p>
+        <p>{{ error_class }}</p>
+        <p>The page could not load</p>
+      {% else %}
       <h1 class="display-3">{{ class.name }}</h1>
 
 
@@ -101,12 +106,12 @@
           <a class="btn btn-info" href="{{ class_info.0.google_sites}}">Google Sites</a>
           <a class="btn btn-info" href="{{ class_info.0.other_resource }}">Resources</a>
           <a href="https://jmss.instructure.com/courses/{{ class.id }}" class="btn btn-info ">Canvas link </a>
-
+          <a class="btn btn-danger float-right" href="{% url 'compvas:classes_refresh' class.id %}">Refresh</a>
         </div>
 
       {% endif %}
 
-
+      {% endif %}
     </header>
 
   <!-- front page -->
@@ -135,6 +140,9 @@
 
   <div id="accordion">
     <h3>Modules</h3>
+    {% if error_modules %}
+      <p>{{ error_modules }}</p>
+    {% else %}
     {% for module in modules %}
 
     <div class="card">
@@ -170,12 +178,16 @@
     </div>
 
     {% endfor %}
+    {% endif %}
   </div>
 
   <br>
 
   <div id="accordion flex-reverse">
     <h3>Assignments</h3>
+    {% if error_assign %}
+      <p>{{ error_assign }}</p>
+    {% else %}
     {% for assignment in assign reversed %}
 
 
@@ -211,6 +223,7 @@
     </div>
 
     {% endfor %}
+    {% endif %}
   </div>
 
   <!-- quizes -->

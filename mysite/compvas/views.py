@@ -8,7 +8,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from home.models import UserProfile
 import requests
-from .models import Class_info
+from .models import Class_info, CachSites
+from .utils import retreve, add_classes
 
 import environ
 env = environ.Env(
@@ -21,62 +22,71 @@ auth_token = env('AUTH_TOKEN')
 
 @xframe_options_exempt
 def index(request):
-    #global auth_token
+    error_message = None
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+    except:
+        context = {"additional_context": {'a': 'compvas', 'b': 'index'}, 'error_message': 'failed to load user profile, Have you made a profile? are you signed in to the right user? if you have done these things contact me'}
+        return render(request, 'compvas/index.html', context)
 
     try:
         auth_token = request.session['canvas_auth_token']
     except:
-        request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
+        request.session['canvas_auth_token'] = profile.canvas_token
         return HttpResponseRedirect(reverse('compvas:index'))
 
     try:
-        calender = UserProfile.objects.get(user=request.user).calender_link
+        calender = profile.calender_link
     except:
         calender = None
+        error_message = 'could not get clender'
+
+    if profile.canvas_classes.all().count() == 0:
+        add_classes(profile=profile, user=request.user, auth_token=auth_token)
 
     class_info = Class_info.objects.filter(user=request.user)
 
-    headers = {"Authorization": f"Bearer {auth_token}"}
-    url = 'https://jmss.instructure.com/api/v1/courses'
-    payload_class = {'include': 'course_image', 'per_page': 1000}
-
-    response = requests.get(url, headers=headers, params=payload_class)
-    context = {"additional_context": {'a': 'compvas', 'b': 'index'}, 'class_info': class_info, 'calender': calender, 'classes': response.json()}
+    context = {"additional_context": {'a': 'compvas', 'b': 'index'}, 'error_message': error_message, 'class_info': class_info, 'calender': calender, 'classes': profile.canvas_classes.all()}
     return render(request, 'compvas/index.html', context)
+
+def index_refresh(request):
+    for cach in UserProfile.objects.get(user=request.user).canvas_classes.all():
+        cach.delete()
+
 
 
 def classes(request, class_id):
-    #global auth_token
-
+    # get the auth token for the session or put the koken in the session
     try:
         auth_token = request.session['canvas_auth_token']
     except:
-        request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
-        return HttpResponseRedirect(reverse('compvas:index'))
+        try:
+            request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
+            return HttpResponseRedirect(reverse('compvas:index'))
+        except:
+            return HttpResponseRedirect(reverse('compvas:index'))
 
-    class_info = Class_info.objects.filter(user=request.user).filter(class_id=class_id)
-
-
-    url_class = f'https://jmss.instructure.com/api/v1/courses/{class_id}'
-    url_assign = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments'
-    url_modules = f'https://jmss.instructure.com/api/v1/courses/{class_id}/modules'
-    url_quiz = f'https://jmss.instructure.com/api/v1/courses/{class_id}/quizzes'
+    # get the front_page using the api
     url_front_page = f'https://jmss.instructure.com/api/v1/courses/{class_id}/front_page'
-
-    payload_modules = {'include': 'items', 'per_page': 1000}
-    payload_assign = {'include': 'items', 'per_page': 1000, 'order_by': 'due_at'}
-
     headers = {"Authorization": f"Bearer {auth_token}"}
-
-    response_class = requests.get(url_class, headers=headers)
-    response_assign = requests.get(url_assign, headers=headers, params=payload_assign)
-    response_modules = requests.get(url_modules, headers=headers, params=payload_modules)
-    response_quiz = requests.get(url_quiz, headers=headers)
     response_front_page = requests.get(url_front_page, headers=headers)
 
-    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'class_info': class_info, 'front_page': response_front_page.json(), 'class': response_class.json(), 'modules': response_modules.json(), 'assign': response_assign.json(), 'quizes': response_quiz.json()}
+    # geting the other context data
+    response = retreve(user=request.user, class_id=class_id, auth_token=auth_token, args=['class', 'assign', 'modules', 'class_info'])
+
+    # formating the context
+    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'front_page': response_front_page.json()} #, 'class': response_class.json(), 'modules': response_modules.json(), 'assign': response_assign.json()} #, 'quizes': response_quiz.json()
+    context.update(response)
     return render(request, 'compvas/class.html', context)
 
+def classes_refresh(request, class_id):
+    cach = CachSites.objects.filter(user=request.user).get(class_id=class_id)
+    cach.class_json = ''
+    cach.modules_json = ''
+    cach.assign_json = ''
+    cach.save()
+
+    return HttpResponseRedirect(reverse('compvas:classes', args=(class_id,)))
 
 def module_item(request, class_id, module_name):
     #global auth_token
@@ -87,23 +97,16 @@ def module_item(request, class_id, module_name):
         request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
         return HttpResponseRedirect(reverse('compvas:index'))
 
-    url_class = f'https://jmss.instructure.com/api/v1/courses/{class_id}'
-    url_assign = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments'
-    url_modules = f'https://jmss.instructure.com/api/v1/courses/{class_id}/modules'
     url_module_item = f'https://jmss.instructure.com/api/v1/courses/{class_id}/pages/{module_name}'
 
     payload_module_item = {'include': 'items', 'per_page': 1000}
-    payload_modules = {'include': 'items', 'per_page': 1000}
-    payload_assign = {'include': 'items', 'per_page': 1000, 'order_by': 'due_at'}
-
     headers = {"Authorization": f"Bearer {auth_token}"}
-
-    response_class = requests.get(url_class, headers=headers)
-    response_assign = requests.get(url_assign, headers=headers, params=payload_assign)
-    response_modules = requests.get(url_modules, headers=headers, params=payload_modules)
     response_module_item = requests.get(url_module_item, headers=headers, params=payload_module_item)
 
-    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'class': response_class.json(), 'module_item': response_module_item.json(), 'modules': response_modules.json(), 'assign': response_assign.json()}
+    response = retreve(user=request.user, class_id=class_id, auth_token=auth_token, args=['class', 'assign', 'modules'])
+
+    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'module_item': response_module_item.json()}
+    context.update(response)
     return render(request, 'compvas/module_item.html', context)
 
 
@@ -116,23 +119,15 @@ def assignment_item(request, class_id, assignment_name):
         request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
         return HttpResponseRedirect(reverse('compvas:index'))
 
-    url_class = f'https://jmss.instructure.com/api/v1/courses/{class_id}'
-    url_assign = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments'
-    url_modules = f'https://jmss.instructure.com/api/v1/courses/{class_id}/modules'
     url_assignment_item = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments/{assignment_name}'
-
     payload_assignment_item = {'include': 'submission', 'per_page': 1000}
-    payload_modules = {'include': 'items', 'per_page': 1000}
-    payload_assign = {'include': 'items', 'per_page': 1000, 'order_by': 'due_at'}
-
     headers = {"Authorization": f"Bearer {auth_token}"}
-
-    response_class = requests.get(url_class, headers=headers)
-    response_assign = requests.get(url_assign, headers=headers, params=payload_assign)
-    response_modules = requests.get(url_modules, headers=headers, params=payload_modules)
     response_assignment_item = requests.get(url_assignment_item, headers=headers, params=payload_assignment_item)
 
-    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'class': response_class.json(), 'assignment_item': response_assignment_item.json(), 'modules': response_modules.json(), 'assign': response_assign.json()}
+    response = retreve(user=request.user, class_id=class_id, auth_token=auth_token, args=['class', 'assign', 'modules'])
+
+    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'assignment_item': response_assignment_item.json()}
+    context.update(response)
     return render(request, 'compvas/assignment_item.html', context)
 
 

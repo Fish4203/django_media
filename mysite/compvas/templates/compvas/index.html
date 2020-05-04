@@ -10,7 +10,7 @@
     <div class="row align-items-center my-5">
       <div class="col-lg-7">
       </div>
-      
+
       <iframe src="{{ calender|safe }}" style="border:solid 1px #777" width="600" height="400" frameborder="0" scrolling="no" ></iframe>
       <!-- /.col-lg-8 -->
       <div class="col-lg-5">
@@ -40,13 +40,14 @@
             <img class="card-img-top" src="{{ class.image_download_url }}" alt="">
             <div class="card-body">
               <h2 class="card-title">{{ class.name }}</h2>
-              <p class="card-text"> the class id is {{ class.id }} and the name is  {{ class.course_code }} </p>
+              <p class="card-text"> the class id is {{ class.class_id }} and the name is  {{ class.course_code }} </p>
             </div>
             <div class="card-footer ">
-              <a href="{% url 'compvas:classes' class.id %}" class="btn btn-success btn-sm m-1">Class</a>
-              <a href="https://jmss.instructure.com/courses/{{ class.id }}" class="btn btn-info btn-sm m-1">Class canvas</a>
+              <a href="{% url 'compvas:classes' class.class_id %}" class="btn btn-success btn-sm m-1">Class</a>
+              <a href="https://jmss.instructure.com/courses/{{ class.class_id }}" class="btn btn-info btn-sm m-1">Class canvas</a>
               {% for class_in in class_info %}
-                {% if class_in.class_id == class.id %}
+                {% if class_in.class_id == class.class_id %}
+                  <div class="dropdown-divider"></div>
                   <a class="btn btn-info btn-sm m-1" href="{{ class_in.compass_link }}">Compass</a>
                   <a class="btn btn-info btn-sm m-1" href="{{ class_in.google_sites}}">Google Sites</a>
                   <a class="btn btn-info btn-sm m-1" href="{{ class_in.other_resource }}">Resources</a>

@@ -8,9 +8,15 @@
     <div class="row">
       <div class="col-lg-8">
 
-      {% block item %}{% endblock %}
+        {% if error_info or error_class %}
+          <p>{{ error_info }}</p>
+          <p>{{ error_class }}</p>
+          <p>The page could not load</p>
+        {% else %}
 
+        {% block item %}{% endblock %}
 
+        {% endif %}
 
       </div>
 
@@ -38,6 +44,9 @@
 
 
           <div class="card-body">
+            {% if error_modules %}
+              <p>{{ error_modules }}</p>
+            {% else %}
             {% for module in modules %}
 
               <h5 class="px-1 ">
@@ -55,6 +64,7 @@
               </div>
 
             {% endfor %}
+            {% endif %}
           </div>
 
         </div>
@@ -67,11 +77,15 @@
 
 
           <div class="card-body ">
+            {% if error_assign %}
+              <p>{{ error_assign }}</p>
+            {% else %}
             {% for assignment in assign reversed %}
               <div class="m-2">
                 <a class="btn btn-success " href="{% url 'compvas:assignment_item' class.id assignment.id %}">{{ assignment.name }}</a>
               </div>
             {% endfor %}
+            {% endif %}
           </div>
 
         </div>
