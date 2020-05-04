@@ -9,13 +9,14 @@
     <!-- Heading Row -->
     <div class="row align-items-center my-5">
       <div class="col-lg-7">
-        <img class="img-fluid rounded mb-4 mb-lg-0" src="http://placehold.it/900x400" alt="">
       </div>
+      
+      <iframe src="{{ calender|safe }}" style="border:solid 1px #777" width="600" height="400" frameborder="0" scrolling="no" ></iframe>
       <!-- /.col-lg-8 -->
       <div class="col-lg-5">
-        <h1 class="font-weight-light">Business Name or Tagline</h1>
-        <p>This is a template that is great for small businesses. It doesn't have too much fancy flare to it, but it makes a great use of the standard Bootstrap core components. Feel free to use this template for any project you want!</p>
-        <a class="btn btn-primary" href="#">Call to Action!</a>
+        <h1 class="font-weight-light">Compvas</h1>
+        <p>This is a better version of canvas that has intergration for google calender, canvas, and compas (commin soon). The goal is to make one portal for everythin jmss to make things eaiser</p>
+
       </div>
       <!-- /.col-md-4 -->
     </div>
@@ -24,7 +25,7 @@
     <!-- Call to Action Well -->
     <div class="card text-white bg-secondary my-5 py-4 text-center">
       <div class="card-body">
-        <p class="text-white m-0">This call to action card is a great place to showcase some important information or display a clever tagline!</p>
+        <p class="text-white m-0">Here are your classes they have links to all the resources you might need</p>
       </div>
     </div>
 
@@ -41,9 +42,17 @@
               <h2 class="card-title">{{ class.name }}</h2>
               <p class="card-text"> the class id is {{ class.id }} and the name is  {{ class.course_code }} </p>
             </div>
-            <div class="card-footer">
-              <a href="{% url 'compvas:classes' class.id %}" class="btn btn-success btn-sm">Class</a>
-              <a href="https://jmss.instructure.com/courses/{{ class.id }}" class="btn btn-info btn-sm">Class canvas</a>
+            <div class="card-footer ">
+              <a href="{% url 'compvas:classes' class.id %}" class="btn btn-success btn-sm m-1">Class</a>
+              <a href="https://jmss.instructure.com/courses/{{ class.id }}" class="btn btn-info btn-sm m-1">Class canvas</a>
+              {% for class_in in class_info %}
+                {% if class_in.class_id == class.id %}
+                  <a class="btn btn-info btn-sm m-1" href="{{ class_in.compass_link }}">Compass</a>
+                  <a class="btn btn-info btn-sm m-1" href="{{ class_in.google_sites}}">Google Sites</a>
+                  <a class="btn btn-info btn-sm m-1" href="{{ class_in.other_resource }}">Resources</a>
+                {% endif %}
+              {% endfor %}
+
             </div>
           </div>
         </div>

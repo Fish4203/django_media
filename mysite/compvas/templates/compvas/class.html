@@ -7,8 +7,106 @@
     <!-- Jumbotron Header -->
     <header class="jumbotron my-4">
       <h1 class="display-3">{{ class.name }}</h1>
-      <p class="lead">Placeholder info {{ class.course_code }} </p>
-      <a href="https://jmss.instructure.com/courses/{{ class.id }}" class="btn btn-info btn-lg">Canvas link </a>
+
+
+      {% if class_info.0.class_id != class.id %}
+        <div class="card">
+          <div class="card-header">
+            <h2>Create a class notes</h2>
+          </div>
+
+          <div class="card-body">
+
+            <form class="create card-body" action="{% url 'compvas:new_notes' class.id %}" method="post">
+              {% csrf_token %}
+
+              <div class="form-group">
+                <label for="notes">notes</label><br>
+                <input type="text" name="notes" id="notes" placeholder="enter any notes or info you want displayed"><br>
+              </div>
+
+              <div class="form-group">
+                <label for="compass_link">link to compas class</label><br>
+                <input type="text" id="compass_link" name="compass_link" placeholder="link"><br>
+              </div>
+
+              <div class="form-group">
+                <label for="google_sites">link to google site</label><br>
+                <input type="text" id="google_sites" name="google_sites" placeholder="link"><br>
+              </div>
+
+              <div class="form-group">
+                <label for="other_resource">link to other class resources</label><br>
+                <input type="text" id="other_resource" name="other_resource" placeholder="link"><br>
+              </div>
+
+              <input class='btn btn-success' type="submit" value="create">
+
+            </form>
+
+          </div>
+        </div>
+
+      {% else %}
+
+        <div class="btn-group float-right">
+
+            <button type="button" class="btn btn-dark dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Edit Notes
+            </button>
+
+
+            <div class="dropdown-menu">
+              <div class="">
+
+                <form class="create card-body" action="{% url 'compvas:new_notes' class.id %}" method="post">
+                  {% csrf_token %}
+
+                  <div class="form-group">
+                    <label for="notes">Notes</label><br>
+                    <input type="text" name="notes" id="notes" value="{{ class_info.0.notes }}"><br>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="compass_link">Link to Compas class</label><br>
+                    <input type="text" id="compass_link" name="compass_link" value="{{ class_info.0.compass_link }}"><br>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="google_sites">Link to Google site</label><br>
+                    <input type="text" id="google_sites" name="google_sites" value="{{ class_info.0.google_sites }}"><br>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="other_resource">Link to other class resources</label><br>
+                    <input type="text" id="other_resource" name="other_resource" value="{{ class_info.0.other_resource }}"><br>
+                  </div>
+
+                  <input class='btn btn-success' type="submit" value="create">
+
+                </form>
+
+              </div>
+
+            </div>
+          </div>
+
+        <!-- notes display -->
+        <div class="">
+
+          <h3>Class notes</h3>
+          <p>{{ class_info.0.notes }}</p>
+
+          <a class="btn btn-info" href="{{ class_info.0.compass_link }}">Compass</a>
+          <a class="btn btn-info" href="{{ class_info.0.google_sites}}">Google Sites</a>
+          <a class="btn btn-info" href="{{ class_info.0.other_resource }}">Resources</a>
+          <a href="https://jmss.instructure.com/courses/{{ class.id }}" class="btn btn-info ">Canvas link </a>
+
+        </div>
+
+      {% endif %}
+
+
     </header>
 
   <!-- front page -->

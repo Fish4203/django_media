@@ -5,7 +5,14 @@ from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from .models import UserProfile
+
+from .utils import enc
 #from message.models import Posts
+
+
+
+
 # Create your views here.
 
 
@@ -21,19 +28,44 @@ def algox(request):
     context = {"additional_context": {'a': 'algox'}}
     return render(request, 'home/algox.html', context)
 
+def profile(request):
+    profile_data = get_object_or_404(UserProfile, user=request.user)
+    context = {"additional_context": {'a': 'profile'}, 'profile_data': profile_data}
+    return render(request, 'home/profile.html', context)
+
 def signin(request):
     username = request.POST['username']
     password = request.POST['password']
     user = authenticate(request, username=username, password=password)
-    print(user)
+    #print(user)
     if user is not None:
         login(request, user)
-        print('it work')
+        #print('it work')
         return HttpResponseRedirect(reverse('home:homePage'))
     else:
         return render(request, 'home/homepage.html', {
             'error_message': "invalid username or password",
         })
+
+def update_profile(request):
+    profile_data = get_object_or_404(UserProfile, user=request.user)
+
+    try:
+        profile_data.user.email = request.POST['email']
+        profile_data.calender_link = request.POST['calender_link']
+
+        profile_data.canvas_token = request.POST['canvas_token']
+
+        #print(profile_data)
+
+        profile_data.save()
+
+        return HttpResponseRedirect(reverse('home:profile'))
+    except:
+        context = {"additional_context": {'a': 'profile'}, 'profile_data': profile_data, 'error_message': 'an error ocured updating the profile'}
+        return render(request, 'home/profile.html', context)
+
+
 
 def new_account(request):
     username = request.POST['username']

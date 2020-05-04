@@ -3,9 +3,12 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 #from django.views import generic
 from django.utils import timezone
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from home.models import UserProfile
 import requests
+from .models import Class_info
 
 import environ
 env = environ.Env(
@@ -15,19 +18,44 @@ environ.Env.read_env()
 
 auth_token = env('AUTH_TOKEN')
 
+
+@xframe_options_exempt
 def index(request):
-    global auth_token
+    #global auth_token
+
+    try:
+        auth_token = request.session['canvas_auth_token']
+    except:
+        request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
+        return HttpResponseRedirect(reverse('compvas:index'))
+
+    try:
+        calender = UserProfile.objects.get(user=request.user).calender_link
+    except:
+        calender = None
+
+    class_info = Class_info.objects.filter(user=request.user)
+
     headers = {"Authorization": f"Bearer {auth_token}"}
     url = 'https://jmss.instructure.com/api/v1/courses'
     payload_class = {'include': 'course_image', 'per_page': 1000}
 
     response = requests.get(url, headers=headers, params=payload_class)
-    context = {"additional_context": {'a': 'compvas', 'b': 'index'}, 'classes': response.json()}
+    context = {"additional_context": {'a': 'compvas', 'b': 'index'}, 'class_info': class_info, 'calender': calender, 'classes': response.json()}
     return render(request, 'compvas/index.html', context)
 
 
 def classes(request, class_id):
-    global auth_token
+    #global auth_token
+
+    try:
+        auth_token = request.session['canvas_auth_token']
+    except:
+        request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
+        return HttpResponseRedirect(reverse('compvas:index'))
+
+    class_info = Class_info.objects.filter(user=request.user).filter(class_id=class_id)
+
 
     url_class = f'https://jmss.instructure.com/api/v1/courses/{class_id}'
     url_assign = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments'
@@ -46,12 +74,18 @@ def classes(request, class_id):
     response_quiz = requests.get(url_quiz, headers=headers)
     response_front_page = requests.get(url_front_page, headers=headers)
 
-    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'front_page': response_front_page.json(), 'class': response_class.json(), 'modules': response_modules.json(), 'assign': response_assign.json(), 'quizes': response_quiz.json()}
+    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'class_info': class_info, 'front_page': response_front_page.json(), 'class': response_class.json(), 'modules': response_modules.json(), 'assign': response_assign.json(), 'quizes': response_quiz.json()}
     return render(request, 'compvas/class.html', context)
 
 
 def module_item(request, class_id, module_name):
-    global auth_token
+    #global auth_token
+
+    try:
+        auth_token = request.session['canvas_auth_token']
+    except:
+        request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
+        return HttpResponseRedirect(reverse('compvas:index'))
 
     url_class = f'https://jmss.instructure.com/api/v1/courses/{class_id}'
     url_assign = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments'
@@ -74,7 +108,13 @@ def module_item(request, class_id, module_name):
 
 
 def assignment_item(request, class_id, assignment_name):
-    global auth_token
+    #global auth_token
+
+    try:
+        auth_token = request.session['canvas_auth_token']
+    except:
+        request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
+        return HttpResponseRedirect(reverse('compvas:index'))
 
     url_class = f'https://jmss.instructure.com/api/v1/courses/{class_id}'
     url_assign = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments'
@@ -97,7 +137,14 @@ def assignment_item(request, class_id, assignment_name):
 
 
 def new_submission(request, class_id, assignment_name):
-    global auth_token
+    #global auth_token
+
+    try:
+        auth_token = request.session['canvas_auth_token']
+    except:
+        request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
+        return HttpResponseRedirect(reverse('compvas:index'))
+
 
     url_submission = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments/{assignment_name}/submissions'
 
@@ -120,6 +167,42 @@ def new_submission(request, class_id, assignment_name):
     except:
         return render(request, 'compvas/index.html', {
             'error_message': f"Failed to make submission error {response_assignment_item.status_code}",
+        })
+
+
+def new_notes(request, class_id):
+
+    try:
+        user = request.user
+        notes = request.POST['notes']
+        compass_link = request.POST['compass_link']
+        google_sites = request.POST['google_sites']
+        other_resource = request.POST['other_resource']
+    except:
+        return render(request, 'compvas/index.html', {
+            'error_message': f"Failed to get data",
+        })
+
+    try:
+        try:
+            info = Class_info.objects.filter(user=request.user).filter(class_id=class_id)
+
+            info.notes = notes
+            info.compass_link = compass_link
+            info.google_sites = google_sites
+            info.other_resource = other_resource
+
+            return HttpResponseRedirect(reverse('compvas:classes', args=(class_id,) ))
+        except:
+            #print(user, notes, class_id)
+            info = Class_info(user=user, class_id=class_id, notes=notes, compass_link=compass_link, google_sites=google_sites, other_resource=other_resource)
+            #print(info)
+            info.save()
+
+            return HttpResponseRedirect(reverse('compvas:classes', args=(class_id,) ))
+    except:
+        return render(request, 'compvas/index.html', {
+            'error_message': f"Failed to make notes",
         })
 
 
