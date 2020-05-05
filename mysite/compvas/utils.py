@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from home.models import UserProfile
 import requests
 from .models import Class_info, CachSites
+from django.shortcuts import redirect
 
 
 def retreve(user, class_id, auth_token, args):
@@ -97,6 +98,30 @@ def retreve(user, class_id, auth_token, args):
             except:
                 response['error_assign'] = 'could not get assignments'
 
+    ## get frontpage
+    if 'front_page' in args:
+        try:
+            if cach.frontpage_json == '':
+                raise ValueError
+
+            response['front_page'] = cach.frontpage_json
+        except:
+            try:
+                url_front_page = f'https://jmss.instructure.com/api/v1/courses/{class_id}/front_page'
+                headers = {"Authorization": f"Bearer {auth_token}"}
+
+                response_front_page = requests.get(url_front_page, headers=headers)
+
+                if response_front_page.status_code != 200:
+                    raise ValueError
+
+                response['front_page'] = response_front_page.json()
+
+                cach.frontpage_json = response_front_page.json()
+                cach.save()
+            except:
+                response['error_frontpage'] = 'could not get frontpage'
+
     ## Class info
     if 'class_info' in args:
         try:
@@ -119,48 +144,48 @@ def add_classes(profile, auth_token, user):
 
     response = requests.get(url, headers=headers, params=payload_class)
 
-    for clas in response.json():
-        try:
-            profile.canvas_classes.add(CachSites.objects.filter(user=request.user).get(class_id=clas['id']))
-        except:
+    if response.status_code == 200:
+        for clas in response.json():
             try:
-                info =  Class_info.objects.filter(user=request.user).get(class_id=clas['id'])
+                profile.canvas_classes.add(CachSites.objects.filter(user=user).get(class_id=clas['id']))
             except:
-                info = Class_info(user=request.user, class_id=clas['id'], notes='You havent added any notes. /n The compass and google site links wont work untill you add them /n to edit notes Click the edit notes ^^^^ to add links an make notes')
-                info.save()
+                try:
+                    info =  Class_info.objects.filter(user=user).get(class_id=clas['id'])
+                except:
+                    info = Class_info(user=user, class_id=clas['id'], notes='You havent added any notes. /n The compass and google site links wont work untill you add them /n to edit notes Click the edit notes ^^^^ to add links an make notes')
+                    info.save()
 
-            cach = CachSites(user=request.user, class_id=clas['id'], class_info=info, name=clas['name'], course_code=clas['course_code'], image_download_url=clas['image_download_url'])
-            cach.save()
+                cach = CachSites(user=user, class_id=clas['id'], class_info=info, name=clas['name'], course_code=clas['course_code'], image_download_url=clas['image_download_url'])
+                cach.save()
 
-            profile.canvas_classes.add(cach)
+                profile.canvas_classes.add(cach)
 
-    profile.save()
-
-
-
-
-
-
-
-
+        profile.save()
+        return True
+    else:
+        return False
 
 
+def get_auth_profile(user, session):
+    # get user profile or rethuns index with error mesage
+    try:
+        profile = UserProfile.objects.get(user=user)
+    except:
+        context = 'failed to load user profile, Have you made a profile? are you signed in to the right user? if you have done these things contact me'
+        return 'error', redirect('home:homePage',error=context)
 
+    # get the auth token for the session or put the koken in the session
+    try:
+        auth_token = session['canvas_auth_token']
+    except:
+        try:
+            session['canvas_auth_token'] = profile.canvas_token
+            return 'error', redirect('compvas:index')
+        except:
+            context = 'failed to auth token, Have you made a profile? are you signed in to the right user? if you have done these things contact me'
+            return 'error', redirect('home:homePage',error=context)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return profile, auth_token
 
 
 

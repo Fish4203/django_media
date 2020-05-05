@@ -4,6 +4,7 @@ from . import views
 app_name = 'compvas'
 urlpatterns = [
     path('', views.index, name='index'),
+    path('index/<str:error>', views.index, name='index'),
     path('index_refresh', views.index_refresh, name='index_refresh'),
     path('<str:class_id>/classes', views.classes, name='classes'),
     path('<str:class_id>/classes_refresh', views.classes_refresh, name='classes_refresh'),

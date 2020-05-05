@@ -61,7 +61,7 @@
             </button>
 
 
-            <div class="dropdown-menu">
+            <div class="dropdown-menu dropdown-menu-right">
               <div class="">
 
                 <form class="create card-body" action="{% url 'compvas:new_notes' class.id %}" method="post">
@@ -69,7 +69,7 @@
 
                   <div class="form-group">
                     <label for="notes">Notes</label><br>
-                    <input type="text" name="notes" id="notes" value="{{ class_info.0.notes }}"><br>
+                    <textarea name="notes" id="notes" rows="8" cols="80">{{ class_info.0.notes }}</textarea><br>
                   </div>
 
                   <div class="form-group">
@@ -129,6 +129,7 @@
 
       <div id="front_page" class="collapse" aria-labelledby="front_page" data-parent="#accordion">
 
+        {{ error_frontpage }}
         {{ front_page.body|safe }}
 
       </div>
@@ -228,7 +229,7 @@
 
   <!-- quizes -->
   <div id="accordion">
-    <h3>Quizzes</h3>
+    <!--<h3>Quizzes</h3>-->
     {% for quiz in quizes %}
 
     <div class="card">

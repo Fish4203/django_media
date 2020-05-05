@@ -5,53 +5,59 @@
   <div class="container">
     <div class="jumbotron">
 
-      <h1>{{ profile_data.user }}'s Profile</h1>
-      <p>Email: {{ profile_data.user.email }}</p>
-      <img src="{{ profile_data.profile_picture }}" alt="">
+      <h1>{{ profile.user }}'s Profile</h1>
+      <p>Email: {{ profile.user.email }}</p>
+      <p>Google Calender link: {{ profile.calender_link }}</p>
+      <p>Calvas tokin: {{ profile.canvas_token }}</p>
+      <br>
+      <img src="{{ profile.profile_picture }}" alt="">
 
       {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-      <div class="card">
-        <div class="card-header">
-          <h2>Update Profile</h2>
 
-        </div>
-
-        <div class="card-body">
-
-          <form class="update" action="{% url 'home:update_profile' %}" method="post">
-            {% csrf_token %}
-
-            <div class="form-group">
-              <label for="email">Email</label><br>
-              <input type="text" name="email" id="email" value="{{ profile_data.user.email }}"><br>
-            </div>
-
-            <div class="form-group">
-              <label for="calender_link">Google Calender link</label><br>
-              <input type="text" id="calender_link" name="calender_link" value="{{ profile_data.calender_link }}"><br>
-            </div>
-
-
-            <div class="form-group">
-              <label for="canvas_token">Canvas Access Token</label><br>
-              <input type="text" id="canvas_token" name="canvas_token" placeholder="token"><br>
-            </div>
-
-            <div class="form-group">
-              <label for="password">Canvas Access Token Password</label><br>
-              <input type="text" id="password" name="password" placeholder="Enter a good password"><br>
-            </div>
-
-            <input class='btn btn-success' type="submit" value="update">
-          </form>
-
-        </div>
-      </div>
 
 
 
     </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Update Profile</h2>
+
+      </div>
+
+      <div class="card-body">
+
+        <form class="update" action="{% url 'home:update_profile' %}" method="post">
+          {% csrf_token %}
+
+          <div class="form-group">
+            <label for="email">Email</label><br>
+            <input type="text" name="email" id="email" value="{{ profile.user.email }}"><br>
+          </div>
+
+          <div class="form-group">
+            <label for="profile_picture">profile pic</label><br>
+            <input type="text" name="profile_picture" id="profile_picture" placeholder="image url"><br>
+          </div>
+
+          <div class="form-group">
+            <label for="calender_link">Google Calender link</label><br>
+            <input type="text" id="calender_link" name="calender_link" value="{{ profile.calender_link }}"><br>
+          </div>
+
+          <div class="form-group">
+            <label for="canvas_token">Canvas Access Token</label><br>
+            <input type="text" id="canvas_token" name="canvas_token" placeholder="token"><br>
+          </div>
+
+          <input class='btn btn-success' type="submit" value="update">
+        </form>
+
+      </div>
+    </div>
+    <br>
+
   </div>
 
 {% endblock %}
