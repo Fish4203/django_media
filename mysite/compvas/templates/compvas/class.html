@@ -215,6 +215,11 @@
             <p>Muted:{{ assignment.muted }}</p>
             <p>submission types:{{ assignment.submission_types }}</p>
             <p>Is compleat:{{ assignment.has_submitted_submissions }}</p>
+
+            {% if assignment.submission.entered_score %}
+              <p>Score: {{ assignment.submission.entered_score }} out of {{ assignment.points_possible }}</p>
+              <p>Grade: {{ assignment.submission.entered_grade }}</p>
+            {% endif %}
           </div>
 
 
@@ -226,6 +231,52 @@
     {% endfor %}
     {% endif %}
   </div>
+
+  <br>
+  <!-- files -->
+  <div id="accordion flex-reverse">
+    <h3>Files</h3>
+    {% if error_files %}
+      <p>{{ error_files }}</p>
+    {% else %}
+    {% for file in files %}
+
+
+
+    <div class="card">
+      <div class="card-header" id="headingOne">
+        <h5 class="mb-0">
+          <button class="btn btn-link-dark collapsed dropdown-toggle" data-toggle="collapse" data-target="#id{{ file.id }}" aria-expanded="false" aria-controls="id{{ file.id }}">
+            {{ file.filename }}
+          </button>
+          <a class="btn btn-info float-right" href="{{ file.url }}">Download</a>
+        </h5>
+      </div>
+
+      <div id="id{{ file.id }}" class="collapse" aria-labelledby="name{{ file.id }}" data-parent="#accordion">
+        <div class="card-body">
+
+          <img src="{{ file.thumbnail_url }}" alt="">
+          <!-- file card -->
+          <div class="">
+            <h3>File info</h3>
+            <p>Last modefied:{{ file.modified_at }}</p>
+            <p>Size:{{ file.size }}</p>
+          </div>
+
+
+
+        </div>
+      </div>
+    </div>
+
+    {% endfor %}
+    {% endif %}
+  </div>
+
+
+
+
 
   <!-- quizes -->
   <div id="accordion">

@@ -15,7 +15,7 @@ def retreve(user, class_id, auth_token, args):
         try:
             info =  Class_info.objects.filter(user=user).get(class_id=class_id)
         except:
-            info = Class_info(user=user, class_id=class_id, notes='You havent added any notes. /n The compass and google site links wont work untill you add them /n to edit notes Click the edit notes ^^^^ to add links an make notes')
+            info = Class_info(user=user, class_id=class_id, notes='Welcome to your class page this is where you can access your clas info, modules, assignments, files, quizes and more. The buttons below arent linked to anything right now but you can change that by adding links using the eddit notes button above. If you cant see a module or assignment you cal always click the refresh button ')
             info.save()
         cach = CachSites(user=user, class_id=class_id, class_info=info)
 
@@ -38,14 +38,15 @@ def retreve(user, class_id, auth_token, args):
 
                 response['class'] = response_class.json()
 
+
                 cach.class_json = response_class.json()
                 cach.name = response_class.json()['name']
                 cach.course_code = response_class.json()['course_code']
-                cach.image_download_url = response_class.json()['image_download_url']
+                #cach.image_download_url = response_class.json()['image_download_url']
 
                 cach.save()
             except:
-                print(response_class.status_code)
+                #print(response_class.status_code, response_class.json())
                 response['error_class'] = 'could not get class data'
 
     ## get moules
@@ -83,7 +84,7 @@ def retreve(user, class_id, auth_token, args):
         except:
             try:
                 url_assign = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments'
-                payload_assign = {'include': 'items', 'per_page': 1000, 'order_by': 'due_at'}
+                payload_assign = {'include': 'submission', 'per_page': 1000, 'order_by': 'due_at'}
                 headers = {"Authorization": f"Bearer {auth_token}"}
 
                 response_assign = requests.get(url_assign, headers=headers, params=payload_assign)
@@ -122,6 +123,36 @@ def retreve(user, class_id, auth_token, args):
             except:
                 response['error_frontpage'] = 'could not get frontpage'
 
+
+    ## get files json
+    if 'files' in args:
+        try:
+            if cach.files_json == '':
+                raise ValueError
+
+            response['files'] = cach.files_json
+        except:
+            try:
+                url_files = f'https://jmss.instructure.com/api/v1/courses/{class_id}/files'
+                payload_files = {'include': 'items', 'per_page': 1000}
+                headers = {"Authorization": f"Bearer {auth_token}"}
+
+                response_files = requests.get(url_files, headers=headers, params=payload_files)
+
+                if response_files.status_code != 200:
+                    raise ValueError
+
+                response['files'] = response_files.json()
+
+
+                cach.files_json = response_files.json()
+
+                cach.save()
+            except:
+                #print(response_class.status_code, response_class.json())
+                response['error_files'] = 'could not get file data'
+
+
     ## Class info
     if 'class_info' in args:
         try:
@@ -152,7 +183,7 @@ def add_classes(profile, auth_token, user):
                 try:
                     info =  Class_info.objects.filter(user=user).get(class_id=clas['id'])
                 except:
-                    info = Class_info(user=user, class_id=clas['id'], notes='You havent added any notes. /n The compass and google site links wont work untill you add them /n to edit notes Click the edit notes ^^^^ to add links an make notes')
+                    info = Class_info(user=user, class_id=clas['id'], notes='Welcome to your class page this is where you can access your clas info, modules, assignments, files, quizes and more. The buttons below arent linked to anything right now but you can change that by adding links using the eddit notes button above. If you cant see a module or assignment you cal always click the refresh button ')
                     info.save()
 
                 cach = CachSites(user=user, class_id=clas['id'], class_info=info, name=clas['name'], course_code=clas['course_code'], image_download_url=clas['image_download_url'])

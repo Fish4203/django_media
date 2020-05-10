@@ -50,7 +50,6 @@
                 <a class="btn btn-success " href="{% url 'home:signin' %}">Signin</a>
                 <a class="btn btn-secondary" href="{% url 'home:new_account' %}">Create Acount</a>
               </div>
-
               {% endif %}
             </div>
         </div>
@@ -61,6 +60,15 @@
 
 
   {% block content %}{% endblock %}
+
+  <br><br><br>
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">Copyright &copy; Ben Ryc</p>
+    </div>
+    <!-- /.container -->
+  </footer>
 
 </body>
 

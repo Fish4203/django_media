@@ -35,7 +35,13 @@ def index(request, error=''):
 
     class_info = Class_info.objects.filter(user=request.user)
 
-    context = {"additional_context": {'a': 'compvas', 'b': 'index'}, 'profile': profile, 'error_message': error, 'class_info': class_info, 'calender': calender, 'classes': profile.canvas_classes.all()}
+    assignments = {}
+    for i in class_info:
+        response = retreve(user=request.user, class_id=i.class_id, auth_token=auth_token, args=['assign'])
+
+        assignments[str(i.class_id)] = response
+
+    context = {"additional_context": {'a': 'compvas', 'b': 'index'}, 'assignments': assignments, 'profile': profile, 'error_message': error, 'class_info': class_info, 'calender': calender, 'classes': profile.canvas_classes.all()}
     return render(request, 'compvas/index.html', context)
 
 
@@ -55,7 +61,7 @@ def classes(request, class_id):
         return auth_token
 
     # geting the other context data
-    response = retreve(user=request.user, class_id=class_id, auth_token=auth_token, args=['class', 'assign', 'modules', 'class_info', 'front_page'])
+    response = retreve(user=request.user, class_id=class_id, auth_token=auth_token, args=['class', 'assign', 'modules', 'class_info', 'front_page', 'files'])
 
     # formating the context
     context = {"additional_context": {'a': 'compvas', 'b': str(class_id)}, 'profile': profile} #, 'class': response_class.json(), 'modules': response_modules.json(), 'assign': response_assign.json()} #, 'quizes': response_quiz.json()
@@ -68,6 +74,7 @@ def classes_refresh(request, class_id):
     cach.class_json = ''
     cach.modules_json = ''
     cach.assign_json = ''
+    cach.frontpage_json = ''
     cach.save()
 
     return redirect('compvas:classes', class_id=class_id)
@@ -144,7 +151,6 @@ def new_submission(request, class_id, assignment_name):
 
 
 def new_notes(request, class_id):
-
     try:
         user = request.user
         notes = request.POST['notes']
@@ -152,31 +158,30 @@ def new_notes(request, class_id):
         google_sites = request.POST['google_sites']
         other_resource = request.POST['other_resource']
     except:
-        return render(request, 'compvas/index.html', {
-            'error_message': f"Failed to get data",
-        })
+        return redirect('compvas:index', error="Failed to gae data")
 
     try:
         try:
-            info = Class_info.objects.filter(user=request.user).filter(class_id=class_id)
+            info = Class_info.objects.filter(user=request.user).get(class_id=class_id)
 
             info.notes = notes
             info.compass_link = compass_link
             info.google_sites = google_sites
             info.other_resource = other_resource
 
-            return HttpResponseRedirect(reverse('compvas:classes', args=(class_id,) ))
+
+            info.save()
+
+            return redirect('compvas:classes', class_id=class_id)
         except:
             #print(user, notes, class_id)
             info = Class_info(user=user, class_id=class_id, notes=notes, compass_link=compass_link, google_sites=google_sites, other_resource=other_resource)
             #print(info)
             info.save()
 
-            return HttpResponseRedirect(reverse('compvas:classes', args=(class_id,) ))
+            return redirect('compvas:classes', class_id=class_id)
     except:
-        return render(request, 'compvas/index.html', {
-            'error_message': f"Failed to make notes",
-        })
+        return redirect('compvas:index', error="Failed to make notes")
 
 
 

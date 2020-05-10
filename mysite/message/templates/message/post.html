@@ -54,6 +54,10 @@
                 <input type="hidden" class="form-control" name="post_top" id="post_top" value="{{ post.id }}">
               </div>
 
+              <div class="form-group">
+                <input type="hidden" class="form-control" name="submission_type" id="submission_type" value="post">
+              </div>
+
               <button type="submit" class="btn btn-primary">Submit</button>
             </form>
           </div>
@@ -69,8 +73,11 @@
               <div class="media-body">
                 <h5 class="mt-0">{{ comment.user.username }}</h5>
                 {{ comment.comment_text }}
+
               </div>
             </div>
+
+
           {% else %}
             <!-- Comment with nested comments -->
             <div class="media mb-4">
@@ -79,18 +86,53 @@
                 <h5 class="mt-0">{{ comment.user.username }}</h5>
                 {{ comment.comment_text }}
 
+                <div class="dropdown float-right">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="comment{{ comment.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Reply
+                  </button>
+
+                  <div class="dropdown-menu dropdown-menu-right " aria-labelledby="comment{{ comment.id }}">
+
+                    <div class="dropdown-item">
+
+                      <h5>Reply</h5>
+
+                      <form class="comment" action="{% url 'message:new_comment' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                          <textarea class="form-control" name='comment_text' id='comment_text' rows="2" cols="50"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                          <input type="hidden" class="form-control" name="post_top" id="post_top" value="{{ comment.id }}">
+                        </div>
+
+                        <div class="form-group">
+                          <input type="hidden" class="form-control" name="submission_type" id="submission_type" value="{{ post.title_text }}">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                      </form>
+
+                    </div>
+                  </div>
+                </div>
+
                 {% for comments in comment.comment_link.all %}
                   <div class="media mt-4">
                     <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
                     <div class="media-body">
                       <h5 class="mt-0">{{ comments.user.username }}</h5>
                       {{ comments.comment_text }}
+
+
                     </div>
                   </div>
+
                 {% endfor %}
               </div>
             </div>
-
+            <div class="dropdown-divider"></div>
             {% endif %}
         {% endfor %}
       </div>

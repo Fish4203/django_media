@@ -42,6 +42,34 @@
   </table>
 {% endif %}
 
+<!-- grades -->
+{% if assignment_item.submission.entered_score %}
+<div class="accordion">
+  <div class="card">
+    <div class="card-header" id="headingOne">
+      <h5 class="mb-0">
+        <button class="btn btn-link-dark collapsed dropdown-toggle" data-toggle="collapse" data-target="#grade" aria-expanded="false" aria-controls="grade">
+          Grades
+        </button>
+      </h5>
+    </div>
+
+    <div id="grade" class="collapse" aria-labelledby="grade" data-parent="#accordion">
+      <div class="card-body">
+
+        <!-- assignment card -->
+
+        <p>Score: {{ assignment_item.submission.entered_score }} out of {{ assignment_item.points_possible }}</p>
+        <p>Grade: {{ assignment_item.submission.entered_grade }}</p>
+        <p>Late: {{ assignment_item.submission.late }}</p>
+        <a href="{{ assignment_item.submission.attachments.0.url }}" class="btn btn-link-dark" >Submission Download </a>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <!-- submission -->
 <div class="accordion">
   <div class="card">
@@ -107,5 +135,6 @@
     </div>
   </div>
 </div>
+
 
 {% endblock %}

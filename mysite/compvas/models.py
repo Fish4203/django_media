@@ -28,6 +28,7 @@ class CachSites(models.Model):
     assign_json = JSONField()
     modules_json = JSONField()
     frontpage_json = JSONField()
+    files_json = JSONField()
 
     def __str__(self):
         return str(self.class_id)
