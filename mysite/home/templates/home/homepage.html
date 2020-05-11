@@ -1,14 +1,69 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
-<div class="fluid-container">
-<div class="">
-  <div class="col px-md-5">
-    <h1>Welcome to the Home page </h1>
-    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
+<!-- Header -->
+<header class="bg-primary py-5 mb-5">
+  <div class="container h-10">
+    <div class="row h-10 align-items-center">
+      <div class="col-lg-12">
+        <h1 class="display-4 text-white mt-5 mb-2">Welcome to the Home page</h1>
+        {% if error_message %}<p class="align-center"><strong>{{ error_message }}</strong></p>{% endif %}
+        <p class="lead mb-5 text-white-50">This is a resource that aims to replace most of the functions of canvas and compass for jmss students</p>
+      </div>
+    </div>
   </div>
+</header>
+
+
+
+<div class="container">
+
+ <div class="row">
+   <div class="col-md-8 mb-5">
+     <h2>How To use</h2>
+     <hr>
+     <p>To get started using the site simply create an account using the create account button. Once you have done this sign in and now you can use the polls app and the mesage bord. If you want to use the compvas section then you have to add a canvas acess token and google calender link to your profile.</p>
+     <p>To get a canvas access token you have to go to your canvas settings. Then get an click the new access token and enter the purpose as 'site intergration'. Once that is done youll get a a token i have blanked out my token with red coppy the token and add it to the canvas token section of your profile. Compvas should work </p>
+     <p>To get the calender integration youll have to go to google calenders and get the embeded link and add it to your profile</p>
+   </div>
+   <div class="col-md-4 mb-5">
+     <h2>Feedback</h2>
+     <hr>
+     <h3>Contacts</h3>
+     <address>
+       <p>Github: <a href="https://github.com/Fish4203/django_projects">https://github.com/Fish4203/django_projects</a></p>
+       <br>
+       <p>Email: ryc0001@jmss.vic.edu.au</p>
+     </address>
+   </div>
+ </div>
+ <!-- /.row -->
+
+ <div class="row">
+   <div class="col">
+     <img src="{% static 'home/settings.png' %}" alt="">
+   </div>
+
+   <div class="col">
+     <img src="{% static 'home/token.png' %}" alt="">
+   </div>
+
+   <div class="col">
+     <img src="{% static 'home/set.png' %}" alt="">
+   </div>
+
+   <div class="col">
+     <img src="{% static 'home/get.png' %}" alt="">
+   </div>
+
+
+ </div>
+ <!-- /.row -->
+
 </div>
-</div>
+<!-- /.container -->
+
+
 {% endblock %}
