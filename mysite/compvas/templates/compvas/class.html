@@ -6,6 +6,11 @@
 
     <!-- Jumbotron Header -->
     <header class="jumbotron my-4">
+      {% if error_info or error_class %}
+        <p>{{ error_info }}</p>
+        <p>{{ error_class }}</p>
+        <p>The page could not load</p>
+      {% else %}
       <h1 class="display-3">{{ class.name }}</h1>
 
 
@@ -56,7 +61,7 @@
             </button>
 
 
-            <div class="dropdown-menu">
+            <div class="dropdown-menu dropdown-menu-right">
               <div class="">
 
                 <form class="create card-body" action="{% url 'compvas:new_notes' class.id %}" method="post">
@@ -64,7 +69,7 @@
 
                   <div class="form-group">
                     <label for="notes">Notes</label><br>
-                    <input type="text" name="notes" id="notes" value="{{ class_info.0.notes }}"><br>
+                    <textarea name="notes" id="notes" rows="8" cols="80">{{ class_info.0.notes }}</textarea><br>
                   </div>
 
                   <div class="form-group">
@@ -101,12 +106,12 @@
           <a class="btn btn-info" href="{{ class_info.0.google_sites}}">Google Sites</a>
           <a class="btn btn-info" href="{{ class_info.0.other_resource }}">Resources</a>
           <a href="https://jmss.instructure.com/courses/{{ class.id }}" class="btn btn-info ">Canvas link </a>
-
+          <a class="btn btn-danger float-right" href="{% url 'compvas:classes_refresh' class.id %}">Refresh</a>
         </div>
 
       {% endif %}
 
-
+      {% endif %}
     </header>
 
   <!-- front page -->
@@ -124,6 +129,7 @@
 
       <div id="front_page" class="collapse" aria-labelledby="front_page" data-parent="#accordion">
 
+        {{ error_frontpage }}
         {{ front_page.body|safe }}
 
       </div>
@@ -135,6 +141,9 @@
 
   <div id="accordion">
     <h3>Modules</h3>
+    {% if error_modules %}
+      <p>{{ error_modules }}</p>
+    {% else %}
     {% for module in modules %}
 
     <div class="card">
@@ -170,12 +179,16 @@
     </div>
 
     {% endfor %}
+    {% endif %}
   </div>
 
   <br>
 
   <div id="accordion flex-reverse">
     <h3>Assignments</h3>
+    {% if error_assign %}
+      <p>{{ error_assign }}</p>
+    {% else %}
     {% for assignment in assign reversed %}
 
 
@@ -202,6 +215,11 @@
             <p>Muted:{{ assignment.muted }}</p>
             <p>submission types:{{ assignment.submission_types }}</p>
             <p>Is compleat:{{ assignment.has_submitted_submissions }}</p>
+
+            {% if assignment.submission.entered_score %}
+              <p>Score: {{ assignment.submission.entered_score }} out of {{ assignment.points_possible }}</p>
+              <p>Grade: {{ assignment.submission.entered_grade }}</p>
+            {% endif %}
           </div>
 
 
@@ -211,11 +229,58 @@
     </div>
 
     {% endfor %}
+    {% endif %}
   </div>
+
+  <br>
+  <!-- files -->
+  <div id="accordion flex-reverse">
+    <h3>Files</h3>
+    {% if error_files %}
+      <p>{{ error_files }}</p>
+    {% else %}
+    {% for file in files %}
+
+
+
+    <div class="card">
+      <div class="card-header" id="headingOne">
+        <h5 class="mb-0">
+          <button class="btn btn-link-dark collapsed dropdown-toggle" data-toggle="collapse" data-target="#id{{ file.id }}" aria-expanded="false" aria-controls="id{{ file.id }}">
+            {{ file.filename }}
+          </button>
+          <a class="btn btn-info float-right" href="{{ file.url }}">Download</a>
+        </h5>
+      </div>
+
+      <div id="id{{ file.id }}" class="collapse" aria-labelledby="name{{ file.id }}" data-parent="#accordion">
+        <div class="card-body">
+
+          <img src="{{ file.thumbnail_url }}" alt="">
+          <!-- file card -->
+          <div class="">
+            <h3>File info</h3>
+            <p>Last modefied:{{ file.modified_at }}</p>
+            <p>Size:{{ file.size }}</p>
+          </div>
+
+
+
+        </div>
+      </div>
+    </div>
+
+    {% endfor %}
+    {% endif %}
+  </div>
+
+
+
+
 
   <!-- quizes -->
   <div id="accordion">
-    <h3>Quizzes</h3>
+    <!--<h3>Quizzes</h3>-->
     {% for quiz in quizes %}
 
     <div class="card">

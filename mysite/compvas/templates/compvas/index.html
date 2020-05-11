@@ -10,13 +10,13 @@
     <div class="row align-items-center my-5">
       <div class="col-lg-7">
       </div>
-      
+
       <iframe src="{{ calender|safe }}" style="border:solid 1px #777" width="600" height="400" frameborder="0" scrolling="no" ></iframe>
       <!-- /.col-lg-8 -->
       <div class="col-lg-5">
         <h1 class="font-weight-light">Compvas</h1>
         <p>This is a better version of canvas that has intergration for google calender, canvas, and compas (commin soon). The goal is to make one portal for everythin jmss to make things eaiser</p>
-
+        <a class="btn btn-danger" href="{% url 'compvas:index_refresh' %}">Refresh class list</a>
       </div>
       <!-- /.col-md-4 -->
     </div>
@@ -40,13 +40,14 @@
             <img class="card-img-top" src="{{ class.image_download_url }}" alt="">
             <div class="card-body">
               <h2 class="card-title">{{ class.name }}</h2>
-              <p class="card-text"> the class id is {{ class.id }} and the name is  {{ class.course_code }} </p>
+              <p class="card-text"> the class id is {{ class.class_id }} and the name is  {{ class.course_code }} </p>
             </div>
             <div class="card-footer ">
-              <a href="{% url 'compvas:classes' class.id %}" class="btn btn-success btn-sm m-1">Class</a>
-              <a href="https://jmss.instructure.com/courses/{{ class.id }}" class="btn btn-info btn-sm m-1">Class canvas</a>
+              <a href="{% url 'compvas:classes' class.class_id %}" class="btn btn-success btn-sm m-1">Class</a>
+              <a href="https://jmss.instructure.com/courses/{{ class.class_id }}" class="btn btn-info btn-sm m-1">Class canvas</a>
               {% for class_in in class_info %}
-                {% if class_in.class_id == class.id %}
+                {% if class_in.class_id == class.class_id %}
+                  <div class="dropdown-divider"></div>
                   <a class="btn btn-info btn-sm m-1" href="{{ class_in.compass_link }}">Compass</a>
                   <a class="btn btn-info btn-sm m-1" href="{{ class_in.google_sites}}">Google Sites</a>
                   <a class="btn btn-info btn-sm m-1" href="{{ class_in.other_resource }}">Resources</a>
@@ -60,6 +61,48 @@
 
     </div>
     <!-- /.row -->
+    <hr>
+    <h3>Class Marks</h3>
+    {% for key_class, value in assignments.items %}
+
+
+
+        {% if error_assign %}
+          <p>{{ error_assign }}</p>
+        {% else %}
+        {% for key, value in value.items reversed %}
+          {% for assignment in value reversed %}
+
+            {% if assignment.submission.entered_score %}
+              <div class="card">
+                <h5 class="card-header">{{ assignment.name }}</h5>
+
+                <!-- assignment card -->
+                <div class="card-body">
+
+                  <a class="btn btn-success float-right m-1" href="{% url 'compvas:assignment_item' key_class assignment.id %}">Assignment link</a>
+                  <a class="btn btn-info float-right m-1" href="https://jmss.instructure.com/courses/{{ class.id }}/assignments/{{ assignment.id }}">Canvas link</a>
+
+                  <p>due Date:{{ assignment.due_at }}</p>
+                  <p>Muted:{{ assignment.muted }}</p>
+                  <p>submission types:{{ assignment.submission_types }}</p>
+                  <p>Is compleat:{{ assignment.has_submitted_submissions }}</p>
+                  <p>Score: {{ assignment.submission.entered_score }} out of {{ assignment.points_possible }}</p>
+                  <p>Grade: {{ assignment.submission.entered_grade }}</p>
+
+                </div>
+
+
+
+              </div>
+            {% endif %}
+
+          {% endfor %}
+        {% endfor %}
+        {% endif %}
+
+
+    {% endfor %}
 
   </div>
   <!-- /.container -->

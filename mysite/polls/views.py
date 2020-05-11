@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic
@@ -40,9 +40,20 @@ class Results(generic.DetailView):
     def get_context_data(self, *args, **kwargs):
         context = super(Results, self).get_context_data(*args, **kwargs)
         context['additional_context'] = self.additional_context
-        print(context)
+        #print(context)
         return context
 
+def delete(request, question_id):
+    try:
+        question = get_object_or_404(Question, pk=question_id)
+
+        if question.user == request.user:
+            question.delete()
+            return redirect('polls:index')
+        else:
+            return redirect('polls:index', error='could not authenticate')
+    except:
+        return redirect('polls:index', error='could not get question')
 
 
 def vote(request, question_id):
@@ -59,21 +70,17 @@ def vote(request, question_id):
         selected_choice.votes += 1
         selected_choice.save()
 
-        return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+        return redirect('polls:results', pk=question.id)
 
 def new_question(request):
     if request.POST['question_name'] == '':
-        return render(request, 'polls/index', {
-            'error_message': "The question was blank",
-        })
+        return redirect('polls:index', error='question was blank')
 
     try:
-        question = Question(question_text=request.POST['question_name'], date=timezone.now())
+        question = Question(user=request.user, question_text=request.POST['question_name'], date=timezone.now())
         question.save()
     except:
-        return render(request, 'polls/index', {
-            'error_message': "Failed to create question",
-        })
+        return redirect('polls:index', error='could not create question')
 
     try:
         question.choice_set.create(choice_text=request.POST['option1'], votes=0)
@@ -85,15 +92,13 @@ def new_question(request):
         try:
             question.delete()
 
-            return render(request, 'polls/index', {
-                'error_message': "failed to create choices question deleated",
-            })
+            return redirect('polls:index', error='could not create choices for question')
         except:
-            return render(request, 'polls/index', {
-                'error_message': "failed to create choices question not deleated",
-            })
+            return redirect('polls:index', error='could not create choices for question')
 
-    return HttpResponseRedirect(reverse('polls:index'))
+
+    return redirect('polls:index')
+
 
 '''
     question_list = Question.objects.order_by('-date')

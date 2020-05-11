@@ -4,8 +4,7 @@ from . import views
 app_name = 'home'
 urlpatterns = [
     path('', views.homePage, name='homePage'),
-    path('AboutMe/', views.about, name='about'),
-    path('algox', views.algox, name='algox'),
+    path('home/<str:error>', views.homePage, name='homePage'),
     path('profile', views.profile, name='profile'),
     path('signin', views.signin, name='signin'),
     path('update_profile', views.update_profile, name='update_profile'),

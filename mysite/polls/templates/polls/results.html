@@ -2,23 +2,21 @@
 
 {% block content %}
 <div class="fluid-container">
-<div class="row ">
-  <div class="col-md-5 px-4">
-    <div class="p-3 jumbotron">
-      <h1>The question is {{ question }}</h1>
 
-      <ul>
-        {% for choice in question.choice_set.all %}
-          <li>{{  choice.choice_text  }} -- {{ choice.votes }} votes{{ choice.votes|pluralize }} </li>
-          <div class="progress">
-            <div class="progress-bar" role="progressbar" style="width: {{ choice.votes }}%" aria-valuenow={{ choice.votes }} aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
-        {% endfor %}
-      </ul>
+  <div class="p-3 jumbotron mx-auto" style="width: 50%;">
+    <h1>The question is {{ question }}</h1>
 
-      <a href="{% url 'polls:detail' question.id %}">another vote</a>
-    </div>
+    <ul>
+      {% for choice in question.choice_set.all %}
+        <li>{{  choice.choice_text  }} -- {{ choice.votes }} votes{{ choice.votes|pluralize }} </li>
+        <div class="progress">
+          <div class="progress-bar" role="progressbar" style="width: {{ choice.votes }}%" aria-valuenow={{ choice.votes }} aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      {% endfor %}
+    </ul>
+
+    <a href="{% url 'polls:detail' question.id %}">another vote</a>
   </div>
-</div>
+
 </div>
 {% endblock %}

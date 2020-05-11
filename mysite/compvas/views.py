@@ -1,150 +1,132 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 #from django.views import generic
 from django.utils import timezone
-from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from home.models import UserProfile
 import requests
-from .models import Class_info
-
-import environ
-env = environ.Env(
-    # set casting, default value
-)
-environ.Env.read_env()
-
-auth_token = env('AUTH_TOKEN')
+from .models import Class_info, CachSites
+from .utils import retreve, add_classes, get_auth_profile
+from django.contrib.auth.decorators import login_required
 
 
-@xframe_options_exempt
-def index(request):
-    #global auth_token
 
-    try:
-        auth_token = request.session['canvas_auth_token']
-    except:
-        request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
-        return HttpResponseRedirect(reverse('compvas:index'))
+
+def index(request, error=''):
+    #
+    # get user profile or rethuns index with error mesage
+    profile, auth_token = get_auth_profile(request.user, request.session)
+    if profile == 'error':
+        return auth_token
 
     try:
-        calender = UserProfile.objects.get(user=request.user).calender_link
+        calender = profile.calender_link
     except:
         calender = None
+        error = 'could not get clender'
+
+    if profile.canvas_classes.all().count() == 0:
+        class_acess = add_classes(profile=profile, user=request.user, auth_token=auth_token)
+
+        if not class_acess:
+            error = 'Your canvas token didnt work if you havent set a token then go to your profile and set the tokin'
 
     class_info = Class_info.objects.filter(user=request.user)
 
-    headers = {"Authorization": f"Bearer {auth_token}"}
-    url = 'https://jmss.instructure.com/api/v1/courses'
-    payload_class = {'include': 'course_image', 'per_page': 1000}
+    assignments = {}
+    for i in class_info:
+        response = retreve(user=request.user, class_id=i.class_id, auth_token=auth_token, args=['assign'])
 
-    response = requests.get(url, headers=headers, params=payload_class)
-    context = {"additional_context": {'a': 'compvas', 'b': 'index'}, 'class_info': class_info, 'calender': calender, 'classes': response.json()}
+        assignments[str(i.class_id)] = response
+
+    context = {"additional_context": {'a': 'compvas', 'b': 'index'}, 'assignments': assignments, 'profile': profile, 'error_message': error, 'class_info': class_info, 'calender': calender, 'classes': profile.canvas_classes.all()}
     return render(request, 'compvas/index.html', context)
 
 
+
+def index_refresh(request):
+    for cach in UserProfile.objects.get(user=request.user).canvas_classes.all():
+        cach.delete()
+    return redirect('compvas:index')
+
+
+
+
 def classes(request, class_id):
-    #global auth_token
 
-    try:
-        auth_token = request.session['canvas_auth_token']
-    except:
-        request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
-        return HttpResponseRedirect(reverse('compvas:index'))
+    profile, auth_token = get_auth_profile(request.user, request.session)
+    if profile == 'error':
+        return auth_token
 
-    class_info = Class_info.objects.filter(user=request.user).filter(class_id=class_id)
+    # geting the other context data
+    response = retreve(user=request.user, class_id=class_id, auth_token=auth_token, args=['class', 'assign', 'modules', 'class_info', 'front_page', 'files'])
 
-
-    url_class = f'https://jmss.instructure.com/api/v1/courses/{class_id}'
-    url_assign = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments'
-    url_modules = f'https://jmss.instructure.com/api/v1/courses/{class_id}/modules'
-    url_quiz = f'https://jmss.instructure.com/api/v1/courses/{class_id}/quizzes'
-    url_front_page = f'https://jmss.instructure.com/api/v1/courses/{class_id}/front_page'
-
-    payload_modules = {'include': 'items', 'per_page': 1000}
-    payload_assign = {'include': 'items', 'per_page': 1000, 'order_by': 'due_at'}
-
-    headers = {"Authorization": f"Bearer {auth_token}"}
-
-    response_class = requests.get(url_class, headers=headers)
-    response_assign = requests.get(url_assign, headers=headers, params=payload_assign)
-    response_modules = requests.get(url_modules, headers=headers, params=payload_modules)
-    response_quiz = requests.get(url_quiz, headers=headers)
-    response_front_page = requests.get(url_front_page, headers=headers)
-
-    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'class_info': class_info, 'front_page': response_front_page.json(), 'class': response_class.json(), 'modules': response_modules.json(), 'assign': response_assign.json(), 'quizes': response_quiz.json()}
+    # formating the context
+    context = {"additional_context": {'a': 'compvas', 'b': str(class_id)}, 'profile': profile} #, 'class': response_class.json(), 'modules': response_modules.json(), 'assign': response_assign.json()} #, 'quizes': response_quiz.json()
+    context.update(response)
     return render(request, 'compvas/class.html', context)
 
 
+def classes_refresh(request, class_id):
+    cach = CachSites.objects.filter(user=request.user).get(class_id=class_id)
+    cach.class_json = ''
+    cach.modules_json = ''
+    cach.assign_json = ''
+    cach.frontpage_json = ''
+    cach.save()
+
+    return redirect('compvas:classes', class_id=class_id)
+
+
+
+
 def module_item(request, class_id, module_name):
-    #global auth_token
+    # get user profile or rethuns index with error mesage
+    profile, auth_token = get_auth_profile(request.user, request.session)
+    if profile == 'error':
+        return auth_token
 
-    try:
-        auth_token = request.session['canvas_auth_token']
-    except:
-        request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
-        return HttpResponseRedirect(reverse('compvas:index'))
-
-    url_class = f'https://jmss.instructure.com/api/v1/courses/{class_id}'
-    url_assign = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments'
-    url_modules = f'https://jmss.instructure.com/api/v1/courses/{class_id}/modules'
     url_module_item = f'https://jmss.instructure.com/api/v1/courses/{class_id}/pages/{module_name}'
 
     payload_module_item = {'include': 'items', 'per_page': 1000}
-    payload_modules = {'include': 'items', 'per_page': 1000}
-    payload_assign = {'include': 'items', 'per_page': 1000, 'order_by': 'due_at'}
-
     headers = {"Authorization": f"Bearer {auth_token}"}
-
-    response_class = requests.get(url_class, headers=headers)
-    response_assign = requests.get(url_assign, headers=headers, params=payload_assign)
-    response_modules = requests.get(url_modules, headers=headers, params=payload_modules)
     response_module_item = requests.get(url_module_item, headers=headers, params=payload_module_item)
 
-    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'class': response_class.json(), 'module_item': response_module_item.json(), 'modules': response_modules.json(), 'assign': response_assign.json()}
+    response = retreve(user=request.user, class_id=class_id, auth_token=auth_token, args=['class', 'assign', 'modules'])
+
+    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'profile': profile, 'module_item': response_module_item.json()}
+    context.update(response)
     return render(request, 'compvas/module_item.html', context)
 
 
+
 def assignment_item(request, class_id, assignment_name):
-    #global auth_token
+    # get user profile or rethuns index with error mesage
+    profile, auth_token = get_auth_profile(request.user, request.session)
+    if profile == 'error':
+        return auth_token
 
-    try:
-        auth_token = request.session['canvas_auth_token']
-    except:
-        request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
-        return HttpResponseRedirect(reverse('compvas:index'))
-
-    url_class = f'https://jmss.instructure.com/api/v1/courses/{class_id}'
-    url_assign = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments'
-    url_modules = f'https://jmss.instructure.com/api/v1/courses/{class_id}/modules'
     url_assignment_item = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments/{assignment_name}'
-
     payload_assignment_item = {'include': 'submission', 'per_page': 1000}
-    payload_modules = {'include': 'items', 'per_page': 1000}
-    payload_assign = {'include': 'items', 'per_page': 1000, 'order_by': 'due_at'}
-
     headers = {"Authorization": f"Bearer {auth_token}"}
-
-    response_class = requests.get(url_class, headers=headers)
-    response_assign = requests.get(url_assign, headers=headers, params=payload_assign)
-    response_modules = requests.get(url_modules, headers=headers, params=payload_modules)
     response_assignment_item = requests.get(url_assignment_item, headers=headers, params=payload_assignment_item)
 
-    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'class': response_class.json(), 'assignment_item': response_assignment_item.json(), 'modules': response_modules.json(), 'assign': response_assign.json()}
+    response = retreve(user=request.user, class_id=class_id, auth_token=auth_token, args=['class', 'assign', 'modules'])
+
+    context = {"additional_context": {'a': 'compvas', 'b': class_id}, 'profile': profile, 'assignment_item': response_assignment_item.json()}
+    context.update(response)
     return render(request, 'compvas/assignment_item.html', context)
+
 
 
 def new_submission(request, class_id, assignment_name):
     #global auth_token
 
-    try:
-        auth_token = request.session['canvas_auth_token']
-    except:
-        request.session['canvas_auth_token'] = UserProfile.objects.get(user=request.user).canvas_token
-        return HttpResponseRedirect(reverse('compvas:index'))
-
+    profile, auth_token = get_auth_profile(request.user, request.session)
+    if profile == 'error':
+        return auth_token
 
     url_submission = f'https://jmss.instructure.com/api/v1/courses/{class_id}/assignments/{assignment_name}/submissions'
 
@@ -159,19 +141,16 @@ def new_submission(request, class_id, assignment_name):
         response_assignment_item = requests.post(url_submission, headers=headers, params=payload_submission)
 
         if response_assignment_item.status_code == 201:
-            return HttpResponseRedirect(reverse('compvas:index'))
+            return redirect('compvas:assignment_item', class_id=class_id, assignment_name=assignment_name)
         else:
-            return render(request, 'compvas/index.html', {
-                'error_message': f"Failed to make submission error {response_assignment_item.status_code}",
-            })
+            return redirect('compvas:index', error=f"Failed to make submission error {response_assignment_item.status_code}")
+
     except:
-        return render(request, 'compvas/index.html', {
-            'error_message': f"Failed to make submission error {response_assignment_item.status_code}",
-        })
+        return redirect('compvas:index', error=f"Failed to make submission error {response_assignment_item.status_code}")
+
 
 
 def new_notes(request, class_id):
-
     try:
         user = request.user
         notes = request.POST['notes']
@@ -179,31 +158,30 @@ def new_notes(request, class_id):
         google_sites = request.POST['google_sites']
         other_resource = request.POST['other_resource']
     except:
-        return render(request, 'compvas/index.html', {
-            'error_message': f"Failed to get data",
-        })
+        return redirect('compvas:index', error="Failed to gae data")
 
     try:
         try:
-            info = Class_info.objects.filter(user=request.user).filter(class_id=class_id)
+            info = Class_info.objects.filter(user=request.user).get(class_id=class_id)
 
             info.notes = notes
             info.compass_link = compass_link
             info.google_sites = google_sites
             info.other_resource = other_resource
 
-            return HttpResponseRedirect(reverse('compvas:classes', args=(class_id,) ))
+
+            info.save()
+
+            return redirect('compvas:classes', class_id=class_id)
         except:
             #print(user, notes, class_id)
             info = Class_info(user=user, class_id=class_id, notes=notes, compass_link=compass_link, google_sites=google_sites, other_resource=other_resource)
             #print(info)
             info.save()
 
-            return HttpResponseRedirect(reverse('compvas:classes', args=(class_id,) ))
+            return redirect('compvas:classes', class_id=class_id)
     except:
-        return render(request, 'compvas/index.html', {
-            'error_message': f"Failed to make notes",
-        })
+        return redirect('compvas:index', error="Failed to make notes")
 
 
 

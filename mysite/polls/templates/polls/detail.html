@@ -2,26 +2,25 @@
 
 {% block content %}
 <div class="fluid-container">
-<div class="row">
-  <div class="col-md-5 px-4">
-    <div class="p-3 jumbotron">
 
-      {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+  <div class="p-3 jumbotron mx-auto" style="width: 50%;">
 
-      <h1>The question is {{ question }}</h1>
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-      <form class="voting" action="{% url 'polls:vote' question.id %}" method="post">
-        {% csrf_token %}
-        {% for choice in question.choice_set.all %}
-          <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+    <h1>The question is {{ question }}</h1>
 
-          <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
-        {% endfor %}
+    <form class="voting" action="{% url 'polls:vote' question.id %}" method="post">
+      {% csrf_token %}
+      {% for choice in question.choice_set.all %}
+        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
 
-        <input type="submit" value="Vote">
-      </form>
-    </div>
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+      {% endfor %}
+
+      <input type="submit" value="Vote">
+    </form>
+
   </div>
-</div>
+
 </div>
 {% endblock %}
