@@ -27,18 +27,6 @@
               <a href="{% url 'message:index' %}" class="nav-item nav-link {% if additional_context.a == 'posts' %} active {% endif %}">message</a>
               <a href="{% url 'polls:index' %}" class="nav-item nav-link {% if additional_context.a == 'polling' %} active {% endif %}">Polls</a>
 
-              <div class="nav-item dropdown">
-                  <a href="#" class="nav-link dropdown-toggle {% if additional_context.a == 'compvas' %} active {% endif %}" data-toggle="dropdown">Compvas</a>
-                  <div class="dropdown-menu bg-dark">
-                      <a href="{% url 'compvas:index' %}" class="dropdown-item nav-link {% if additional_context.b == 'index' %} active {% endif %} ">Index</a>
-
-                      {% for canvas_class in profile.canvas_classes.all %}
-                      <a href="{% url 'compvas:classes' canvas_class.class_id %}" class="dropdown-item nav-link {% if additional_context.b == canvas_class.class_id %} active {% endif %}">{{ canvas_class.name }}</a>
-                      {% endfor %}
-
-                  </div>
-              </div>
-
 
             </div>
             <div class="navbar-nav ml-auto ">
