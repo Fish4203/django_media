@@ -1,3 +1,4 @@
-# django_projects
+# django media
 
-these are some projects im doing in django probably just to learn how to use django
+A small project where created to learn django 
+There are a few apps that do things such as mesaging, creating blog posts and making polls
