@@ -16,7 +16,7 @@ from .models import UserProfile
 
 
 def homePage(request, error=''):
-    print(error, 'rrrrrrrrrr')
+    #print(error, 'rrrrrrrrrr')
     context = {"additional_context": {'a': 'home'}, 'error_message': error}
     return render(request, 'home/homepage.html', context)
 

@@ -17,7 +17,7 @@ class Index(generic.ListView):
     def get_context_data(self, *args, **kwargs):
         context = super(Index, self).get_context_data(*args, **kwargs)
         context['additional_context'] = self.additional_context
-        print(context)
+        #print(context)
         return context
 
 
@@ -29,7 +29,7 @@ class Detail(generic.DetailView):
     def get_context_data(self, *args, **kwargs):
         context = super(Detail, self).get_context_data(*args, **kwargs)
         context['additional_context'] = self.additional_context
-        print(context)
+        #print(context)
         return context
 
 class Results(generic.DetailView):

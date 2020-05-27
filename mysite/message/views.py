@@ -59,10 +59,10 @@ def new_comment(request):
             return redirect('message:post_full', title=post.title_text)
         else:
             post = Comments.objects.get(id=int(request.POST['post_top']))
-            print('22222222222')
+            #print('22222222222')
             post.comment_link.add(comment)
             post.save()
-            print('333333')
+            #print('333333')
             return redirect('message:post_full', title=request.POST['submission_type'])
 
     except:

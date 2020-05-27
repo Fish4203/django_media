@@ -6,9 +6,8 @@ from django.utils import timezone
 # Create your models here.
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    canvas_token = models.CharField(max_length=2000, null=True, blank=False)
-    calender_link = models.CharField(max_length=2000, default='', blank=True)
     profile_picture = models.ImageField(upload_to='thumbpath', blank=True)
+    phone_num = models.CharField(max_length=10, default='', blank=True)
 
     def __str__(self):
         return self.user.username
