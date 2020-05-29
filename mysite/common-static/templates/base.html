@@ -9,13 +9,13 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
 <head>
-  <title>JMSS Compvas</title>
+  <title>Ben Comunication</title>
 </head>
 
 <body class="">
   <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-3">
     <div class="container-fluid">
-        <a href="#" class="navbar-brand mr-3">JMSS Compvas</a>
+        <a href="#" class="navbar-brand mr-3">Comunication</a>
         <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -26,6 +26,7 @@
               <a href="{% url 'home:homePage' %}" class="nav-item nav-link {% if additional_context.a == 'home' %} active {% endif %}">Home</a>
               <a href="{% url 'message:index' %}" class="nav-item nav-link {% if additional_context.a == 'posts' %} active {% endif %}">message</a>
               <a href="{% url 'polls:index' %}" class="nav-item nav-link {% if additional_context.a == 'polling' %} active {% endif %}">Polls</a>
+              <a href="{% url 'chat:index' %}" class="nav-item nav-link {% if additional_context.a == 'chat' %} active {% endif %}">Chat</a>
 
 
             </div>

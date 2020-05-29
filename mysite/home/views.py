@@ -54,9 +54,7 @@ def update_profile(request):
 
     try:
         profile_data.user.email = request.POST['email']
-        profile_data.calender_link = request.POST['calender_link']
         profile_data.profile_picture = request.POST['profile_picture']
-        profile_data.canvas_token = request.POST['canvas_token']
 
         #print(profile_data)
 

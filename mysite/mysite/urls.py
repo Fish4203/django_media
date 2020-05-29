@@ -21,4 +21,5 @@ urlpatterns = [
     path('polls/', include('polls.urls')),
     path('', include('home.urls')),
     path('message/', include('message.urls')),
+    path('chat/',include('chat.urls'))
 ]
